@@ -124,15 +124,14 @@ const ManageProductsClient: React.FC<ManageProductsClientProps> = ({
 
     const handleImageDelete = async () => {
       try {
-        // Dynamic import to avoid webpack issues
-        const { getStorage, ref, deleteObject } = await import("firebase/storage");
-        const firebaseApp = (await import("@/libs/firebase")).default;
-        const storage = getStorage(firebaseApp);
-        
         for (const item of images) {
           if (item.image) {
-            const imageRef = ref(storage, item.image);
-            await deleteObject(imageRef);
+            // Delete via server API
+            await fetch("/api/upload", {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ url: item.image }),
+            });
           }
         }
       } catch (error) {

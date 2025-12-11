@@ -93,54 +93,28 @@ const AddProductForm = () => {
     const handleImageUploads = async () => {
       toast("Creating product, please wait...");
       try {
-        // Dynamic import to avoid webpack issues
-        const { getStorage, ref, uploadBytesResumable, getDownloadURL } = await import("firebase/storage");
-        const firebaseApp = (await import("@/libs/firebase")).default;
-        
         for (const item of data.images) {
           if (item.image) {
-            const fileName = new Date().getTime() + "-" + item.image.name;
-            const storage = getStorage(firebaseApp);
-            const storageRef = ref(storage, `products/${fileName}`);
-            const uploadTask = uploadBytesResumable(storageRef, item.image);
+            // Upload to server API
+            const formData = new FormData();
+            formData.append("file", item.image);
+            formData.append("color", item.color);
 
-            await new Promise<void>((resolve, reject) => {
-              uploadTask.on(
-                "state_changed",
-                (snapshot) => {
-                  const progress =
-                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                  console.log("Upload is " + progress + "% done");
-                  switch (snapshot.state) {
-                    case "paused":
-                      console.log("Upload is paused");
-                      break;
-                    case "running":
-                      console.log("Upload is running");
-                      break;
-                  }
-                },
-                (error) => {
-                  console.log("Error uploading image", error);
-                  reject(error);
-                },
-                () => {
-                  getDownloadURL(uploadTask.snapshot.ref)
-                    .then((downloadURL) => {
-                      uploadedImages.push({
-                        ...item,
-                        image: downloadURL,
-                      });
-                      console.log("File available at", downloadURL);
-                      resolve();
-                    })
-                    .catch((error) => {
-                      console.log("Error getting the download URL", error);
-                      reject(error);
-                    });
-                }
-              );
+            const response = await fetch("/api/upload", {
+              method: "POST",
+              body: formData,
             });
+
+            if (!response.ok) {
+              throw new Error("Upload failed");
+            }
+
+            const { url } = await response.json();
+            uploadedImages.push({
+              ...item,
+              image: url,
+            });
+            console.log("File available at", url);
           }
         }
       } catch (error) {
