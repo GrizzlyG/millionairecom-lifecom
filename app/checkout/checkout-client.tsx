@@ -6,8 +6,14 @@ import { useCallback, useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
 import CheckoutForm from "./checkout-form";
 import Button from "../components/button";
+import { Settings } from "@prisma/client";
 
-const CheckoutClient = () => {
+interface CheckoutClientProps {
+  settings: Settings | null;
+  currentUser: any;
+}
+
+const CheckoutClient: React.FC<CheckoutClientProps> = ({ settings, currentUser }) => {
   const router = useRouter();
   const { cartProducts, paymentIntent, handleSetPaymentIntent, handleClearCart } = useCart();
   const [loading, setLoading] = useState(false);
@@ -15,6 +21,8 @@ const CheckoutClient = () => {
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const hasRunOnce = useRef(false);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [guestToken, setGuestToken] = useState<string | null>(null);
+  const spf = (settings as any)?.spf || 100;
 
 
   useEffect(() => {
@@ -31,14 +39,11 @@ const CheckoutClient = () => {
         body: JSON.stringify({
           items: cartProducts,
           payment_intent_id: null,
+          // Guest checkout data will be added by CheckoutForm if not logged in
         }),
       })
           .then(async (res) => {
               setLoading(false);
-              if (res.status === 401) {
-                return router.push("/login");
-              }
-
               const json = await res.json().catch(() => ({}));
 
               if (!res.ok) {
@@ -62,6 +67,9 @@ const CheckoutClient = () => {
           .then((data) => {
             if (data?.orderId) {
               setOrderId(data.orderId);
+              if (data?.guestToken) {
+                setGuestToken(data.guestToken);
+              }
               console.log("Order ID:", data.orderId);
               handleSetPaymentIntent(data.orderId);
             } else {
@@ -78,8 +86,16 @@ const CheckoutClient = () => {
   }, []);
 
   const handleSetPaymentSuccess = useCallback(
-    (value: boolean) => {
+    (value: boolean, deliveryInfo?: { name: string; phone: string; address: string }) => {
       setPaymentSuccess(value);
+      if (value && deliveryInfo && orderId) {
+        // Update order with delivery info
+        fetch(`/api/order/${orderId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address: deliveryInfo }),
+        }).catch(err => console.error('Failed to update delivery info:', err));
+      }
       if (value) {
         // Show success notification with payment instructions
         toast.success(
@@ -87,7 +103,7 @@ const CheckoutClient = () => {
             <div className="text-sm">
               <p className="font-semibold mb-2">Order placed successfully!</p>
               <p className="mb-2">Kindly pay to the account details provided.</p>
-              <p className="mb-2">Then tick "I have paid" on your order when done.</p>
+              <p className="mb-2">Then tick <em>I have paid</em> on your order when done.</p>
               <button
                 onClick={() => toast.dismiss(t.id)}
                 className="mt-3 px-3 py-1 bg-white text-teal-600 rounded font-medium text-xs"
@@ -103,7 +119,7 @@ const CheckoutClient = () => {
         handleSetPaymentIntent(null);
       }
     },
-    [cartProducts, paymentIntent, handleClearCart, handleSetPaymentIntent]
+    [cartProducts, paymentIntent, handleClearCart, handleSetPaymentIntent, orderId]
   );
 
   return (
@@ -118,7 +134,12 @@ const CheckoutClient = () => {
           <div className="max-w-[220px] w-full">
             <Button
               label={`View Your Order`}
-              onClick={() => router.push(`/order/${orderId}`)}
+              onClick={() => {
+                const url = guestToken 
+                  ? `/order/${orderId}?token=${guestToken}` 
+                  : `/order/${orderId}`;
+                router.push(url);
+              }}
             />
           </div>
         </div>
@@ -126,6 +147,8 @@ const CheckoutClient = () => {
       {cartProducts && (
         <CheckoutForm
           handleSetPaymentSuccess={handleSetPaymentSuccess}
+          spf={spf}
+          currentUser={currentUser}
         />
       )}
     </div>

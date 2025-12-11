@@ -55,8 +55,10 @@ const AddProductForm = () => {
       category: "",
       inStock: false,
       stock: 0,
+      isVisible: true,
       images: [],
       price: "",
+      dmc: "",
       list: "",
     },
   });
@@ -153,11 +155,13 @@ const AddProductForm = () => {
     await handleImageUploads();
 
     const list = data.list === "" || data.list === 0 ? data.price : data.list;
+    const dmc = data.dmc === "" || data.dmc === 0 ? 0 : Number(data.dmc);
 
     const productData = {
       ...data,
       images: uploadedImages,
       list: list,
+      dmc: dmc,
       stock: data.stock ? Number(data.stock) : 0,
     };
 
@@ -166,7 +170,7 @@ const AddProductForm = () => {
       .then(() => {
         toast.success("Product created");
         setIsProductCreated(true);
-        router.refresh();
+        router.push("/admin/manage-products");
       })
       .catch((error) => {
         toast.error("Something went wrong.");
@@ -203,74 +207,107 @@ const AddProductForm = () => {
   }, []);
 
   return (
-    <>
-      <Header title="Add a Product" center />
-      <Input
-        id="name"
-        label="Name"
-        disabled={isLoading}
-        register={register}
-        errors={errors}
-        required
-      />
-      <div className="flex w-full gap-3">
-        <Input
-          id="price"
-          label="Price"
-          disabled={isLoading}
-          register={register}
-          errors={errors}
-          type="number"
-          required
-        />
-        <Input
-          id="list"
-          label="List"
-          disabled={isLoading}
-          register={register}
-          errors={errors}
-          type="number"
-        />
-        <Input
-          id="stock"
-          label="Stock Quantity"
-          disabled={isLoading}
-          register={register}
-          errors={errors}
-          type="number"
-        />
+    <div className="max-w-[1000px] mx-auto">
+      <div className="mb-8">
+        <Header title="Add a Product" center />
       </div>
-      <Input
-        id="brand"
-        label="Brand"
-        disabled={isLoading}
-        register={register}
-        errors={errors}
-        required
-      />
-      <TextArea
-        id="description"
-        label="Description"
-        disabled={isLoading}
-        register={register}
-        errors={errors}
-        required
-      />
-      <CustomCheckbox
-        id="inStock"
-        register={register}
-        label="This product is in stock"
-      />
-      <div className="w-full font-medium">
-        <div className="mb-2 font-semibold">Select a Category</div>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h[50vh] overfolow-y-auto">
+
+      {/* Product Information Section */}
+      <div className="bg-white rounded-lg p-6 mb-6 border border-slate-300" style={{boxShadow: '0 2px 4px rgba(0,0,0,0.3)'}}>
+        <h3 className="text-lg font-semibold mb-4 text-slate-700">Product Information</h3>
+        <div className="space-y-4">
+          <Input
+            id="name"
+            label="Product Name"
+            disabled={isLoading}
+            register={register}
+            errors={errors}
+            required
+          />
+          <TextArea
+            id="description"
+            label="Product Description"
+            disabled={isLoading}
+            register={register}
+            errors={errors}
+            required
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              id="brand"
+              label="Brand"
+              disabled={isLoading}
+              register={register}
+              errors={errors}
+              required
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Pricing Section */}
+      <div className="bg-white rounded-lg p-6 mb-6 border border-slate-300" style={{boxShadow: '0 2px 4px rgba(0,0,0,0.3)'}}>
+        <h3 className="text-lg font-semibold mb-4 text-slate-700">Pricing & Stock</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Input
+            id="price"
+            label="Price (₦)"
+            disabled={isLoading}
+            register={register}
+            errors={errors}
+            type="number"
+            required
+          />
+          <Input
+            id="dmc"
+            label="DMC (₦)"
+            disabled={isLoading}
+            register={register}
+            errors={errors}
+            type="number"
+          />
+          <Input
+            id="list"
+            label="List Price (₦)"
+            disabled={isLoading}
+            register={register}
+            errors={errors}
+            type="number"
+          />
+          <Input
+            id="stock"
+            label="Stock Quantity"
+            disabled={isLoading}
+            register={register}
+            errors={errors}
+            type="number"
+          />
+        </div>
+        <div className="mt-4 flex gap-6">
+          <CustomCheckbox
+            id="inStock"
+            register={register}
+            label="This product is in stock"
+          />
+          <CustomCheckbox
+            id="isVisible"
+            register={register}
+            label="Make this product visible to customers"
+          />
+        </div>
+      </div>
+
+      {/* Category Section */}
+      <div className="bg-white rounded-lg p-6 mb-6 border border-slate-300" style={{boxShadow: '0 2px 4px rgba(0,0,0,0.3)'}}>
+        <h3 className="text-lg font-semibold mb-4 text-slate-700">Category</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {categories.map((item) => {
             if (item.label === "All") {
               return null;
             }
 
             return (
-              <div key={item.label} className="col-span">
+              <div key={item.label}>
                 <CategoryInput
                   onClick={(category) => setCustomValue("category", category)}
                   selected={category === item.label}
@@ -281,37 +318,41 @@ const AddProductForm = () => {
             );
           })}
         </div>
-        <div className="w-full flex flex-col flex-wrap gap-4 mt-5">
-          <div>
-            <div className="font-bold">
-              Select the available product colors and upload their images.
-            </div>
-            <div className="text-small">
-              You must upload an image for each of the color selected otherwise
-              your color selection will be ignored.
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {colors.map((item, index) => {
-              return (
-                <SelectColor
-                  key={index}
-                  item={item}
-                  addImageToState={addImageToState}
-                  removeImageFromState={removeImageFromState}
-                  isProductCreated={isProductCreated}
-                />
-              );
-            })}
-          </div>
+      </div>
+
+      {/* Color & Images Section */}
+      <div className="bg-white rounded-lg p-6 mb-6 border border-slate-300" style={{boxShadow: '0 2px 4px rgba(0,0,0,0.3)'}}>
+        <h3 className="text-lg font-semibold mb-2 text-slate-700">Product Colors & Images</h3>
+        <p className="text-sm text-slate-600 mb-4">
+          Select available colors and upload an image for each. Colors without images will be ignored.
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {colors.map((item, index) => {
+            return (
+              <SelectColor
+                key={index}
+                item={item}
+                addImageToState={addImageToState}
+                removeImageFromState={removeImageFromState}
+                isProductCreated={isProductCreated}
+              />
+            );
+          })}
         </div>
       </div>
-      <Button
-        label={isLoading ? "Loading..." : "Add Product"}
-        disabled={isLoading}
-        onClick={handleSubmit(onSubmit)}
-      />
-    </>
+
+      {/* Submit Button */}
+      <div className="flex justify-center mb-8">
+        <div className="w-full md:w-96">
+          <Button
+            label={isLoading ? "Creating Product..." : "Add Product"}
+            disabled={isLoading}
+            onClick={handleSubmit(onSubmit)}
+            type="submit"
+          />
+        </div>
+      </div>
+    </div>
   );
 };
 

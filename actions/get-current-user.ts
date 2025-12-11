@@ -32,6 +32,12 @@ export default async function getCurrentUser() {
       createdAt: currentUser.createdAt.toISOString(),
       updatedAt: currentUser.updatedAt.toISOString(),
       emailVerified: currentUser.emailVerified?.toISOString() || null,
+      orders: currentUser.orders.map(order => ({
+        ...order,
+        createDate: order.createDate?.toISOString() || null,
+        createdAt: order.createdAt.toISOString(),
+        updatedAt: order.updatedAt.toISOString(),
+      })),
     };
   } catch (error) {
     return null;

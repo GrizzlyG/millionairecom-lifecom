@@ -42,7 +42,18 @@ export const CartContextProvider = (props: Props) => {
     const shopPaymentIntent: any = localStorage.getItem("paymentIntent");
     const paymentIntent: string | null = JSON.parse(shopPaymentIntent);
 
-    setCartProducts(storageCartProducts);
+    // Migrate old cart items to include DMC field (default to 0 if missing)
+    if (storageCartProducts) {
+      const migratedCart = storageCartProducts.map(item => ({
+        ...item,
+        dmc: item.dmc ?? 0
+      }));
+      setCartProducts(migratedCart);
+      localStorage.setItem("cartItems", JSON.stringify(migratedCart));
+    } else {
+      setCartProducts(storageCartProducts);
+    }
+    
     setPaymentIntent(paymentIntent);
   }, []);
 
@@ -51,7 +62,7 @@ export const CartContextProvider = (props: Props) => {
       if (cartProducts) {
         const { total, quantity } = cartProducts.reduce(
           (acc, item) => {
-            const itemTotal = item.price * item.quantity;
+            const itemTotal = (item.price + (item.dmc || 0)) * item.quantity;
             acc.total += itemTotal;
             acc.quantity += item.quantity;
 

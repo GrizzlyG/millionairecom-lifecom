@@ -36,6 +36,7 @@ model User {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   role Role         @default(USER)
+  fcmToken          String?
 
   accounts          Account[]
   orders            Order[]
@@ -47,12 +48,14 @@ model Product {
   name              String
   description       String
   price             Float
+  dmc               Float   @default(0)
   list              Float
   brand             String
   category          String
   inStock           Boolean
   stock             Int     @default(0)
   remainingStock    Int     @default(0)
+  isVisible         Boolean @default(true)
   images            Image[]
   reviews           Review[]
 }
@@ -71,19 +74,28 @@ model Review {
 
 model Order {
   id                String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId            String    @db.ObjectId
+  userId            String?   @db.ObjectId
+  guestEmail        String?
+  guestName         String?
+  guestToken        String?   @unique
   amount            Float
+  totalDmc          Float     @default(0)
   currency          String
   status            String
   deliveryStatus    String
   paymentConfirmed  Boolean   @default(false)
   paymentClaimed    Boolean   @default(false)
+  cancelled         Boolean   @default(false)
+  cancelledAt       DateTime?
+  refundAmount      Float     @default(0)
+  reimbursed        Boolean   @default(false)
+  reimbursedAt      DateTime?
   createDate        DateTime  @default(now())
   paymentIntentId   String    @unique
   products          CartProductType[]
   address           Address?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 type CartProductType {
@@ -104,15 +116,22 @@ type Image {
 }
 
 type Address {
-  hostel String
+  name    String?
+  phone   String?
+  address String?
+  hostel  String?
 }
 
 model Settings {
-  id                String  @id @default("settings") @map("_id")
+  id                String    @id @default("settings") @map("_id")
   bankName          String
   bankAccountNumber String
   accountHolderName String
-  updatedAt         DateTime @updatedAt
+  hostels           String[]  @default([])
+  spf               Float     @default(100)
+  nextDeliveryTime  DateTime?
+  whatsappNumber    String?
+  updatedAt         DateTime  @updatedAt
 }
 
 model Notification {
@@ -124,7 +143,14 @@ model Notification {
   orderId    String?  @db.ObjectId
 }
 
+model Reimbursement {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  amount    Float
+  createdAt DateTime @default(now())
+}
+
 enum Role {
     USER
     ADMIN
+    MANAGER
 }

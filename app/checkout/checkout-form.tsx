@@ -6,30 +6,42 @@ import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import Heading from "../components/heading";
 import Button from "../components/button";
+import { useRouter } from "next/navigation";
+import { X, Info } from "lucide-react";
 
 interface CheckoutFormProps {
-  handleSetPaymentSuccess: (value: boolean) => void;
+  handleSetPaymentSuccess: (value: boolean, deliveryInfo?: { name: string; phone: string; address: string; hostel?: string }) => void;
+  spf: number;
+  currentUser?: any;
 }
 
 interface BankDetails {
   bankName: string;
   bankAccountNumber: string;
   accountHolderName: string;
+  hostels: string[];
 }
 
 const CheckoutForm: React.FC<CheckoutFormProps> = ({
   handleSetPaymentSuccess,
+  spf,
+  currentUser,
 }) => {
-  const { cartTotalAmount, handleClearCart } = useCart();
+  const router = useRouter();
+  const { cartTotalAmount, handleClearCart, cartProducts } = useCart();
   const [isLoading, setIsLoading] = useState(false);
   const [bankDetails, setBankDetails] = useState<BankDetails | null>(null);
+  const [showGuestBanner, setShowGuestBanner] = useState(!currentUser);
   const [formData, setFormData] = useState({
-    name: "",
+    name: currentUser?.name || "",
+    email: currentUser?.email || "",
     phone: "",
     address: "",
+    hostel: "",
   });
 
-  const formattedPrice = formatPrice(cartTotalAmount);
+  const totalWithSpf = cartTotalAmount + spf;
+  const formattedPrice = formatPrice(totalWithSpf);
 
   // Fetch bank details on mount
   useEffect(() => {
@@ -54,7 +66,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
     e.preventDefault();
 
     // Basic validation
-    if (!formData.name || !formData.phone || !formData.address) {
+    if (!formData.name || !formData.phone || !formData.hostel) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -62,12 +74,26 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
     setIsLoading(true);
 
     try {
-      // Simulate payment processing
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // If guest checkout, create order with guest info
+      if (!currentUser) {
+        const response = await fetch("/api/create-payment-intent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: cartProducts,
+            guestEmail: formData.email,
+            guestName: formData.name,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to create order");
+        }
+      }
 
       toast.success("Order made successfully!");
       handleClearCart();
-      handleSetPaymentSuccess(true);
+      handleSetPaymentSuccess(true, formData);
     } catch (error) {
       toast.error("Payment failed. Please try again.");
     } finally {
@@ -80,6 +106,42 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
       <div className="mb-6">
         <Heading title="Enter your details to complete checkout" />
       </div>
+
+      {/* Guest Notification Banner */}
+      {!currentUser && showGuestBanner && (
+        <div className="mb-6 bg-amber-50 border border-amber-300 rounded-lg p-4 flex items-start gap-3">
+          <Info className="text-amber-600 text-xl flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm text-amber-900 mb-3">
+              <strong>Guest Checkout:</strong> You'll need to check the app manually to know when your order is ready. 
+              Create an account to receive notifications!
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => router.push("/login")}
+                className="px-4 py-1.5 bg-amber-600 text-white text-sm rounded-md hover:bg-amber-700 transition"
+              >
+                Login
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push("/register")}
+                className="px-4 py-1.5 bg-white text-amber-600 text-sm rounded-md border border-amber-600 hover:bg-amber-50 transition"
+              >
+                Register
+              </button>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowGuestBanner(false)}
+            className="text-amber-600 hover:text-amber-800 transition"
+          >
+            <X size={20} />
+          </button>
+        </div>
+      )}
 
       <div className="space-y-6">
         {/* Delivery Information */}
@@ -105,22 +167,46 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 name="phone"
                 value={formData.phone}
                 onChange={handleInputChange}
-                placeholder="+1 (555) 123-4567"
+                placeholder="+234 XXX XXX XXXX"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Address *</label>
+              <label className="block text-sm font-medium mb-2">Hostel *</label>
+              <select
+                name="hostel"
+                value={formData.hostel}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                <option value="">Select a hostel</option>
+                {bankDetails?.hostels?.map((hostel, index) => (
+                  <option key={index} value={hostel}>
+                    {hostel}
+                  </option>
+                ))}
+              </select>
+              {bankDetails && bankDetails.hostels && bankDetails.hostels.length === 0 && (
+                <p className="text-xs text-red-500 mt-1">
+                  No hostels available. Please contact admin.
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Additional Address (Optional)
+              </label>
               <input
                 type="text"
                 name="address"
                 value={formData.address}
                 onChange={handleInputChange}
-                placeholder="Street address"
+                placeholder="Room number, landmarks, etc."
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
               />
             </div>
           </div>
@@ -153,8 +239,23 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
       </div>
 
       {/* Total */}
-      <div className="py-4 text-center text-slate-700 text-xl font-bold">
-        Total Amount: {formattedPrice}
+      <div className="py-4 border-t border-gray-300 mt-6">
+        <div className="flex justify-between text-slate-600 mb-2">
+          <span>Subtotal:</span>
+          <span>{formatPrice(cartTotalAmount)}</span>
+        </div>
+        <div className="flex justify-between text-slate-600 mb-2">
+          <span>Sorting & Packaging Fee:</span>
+          <span>{formatPrice(spf)}</span>
+        </div>
+        <div className="flex justify-between text-slate-600 mb-2">
+          <span>Delivery Fee:</span>
+          <span>{formatPrice(0)}</span>
+        </div>
+        <div className="flex justify-between text-slate-700 text-xl font-bold pt-2 border-t">
+          <span>Total Amount:</span>
+          <span>{formattedPrice}</span>
+        </div>
       </div>
 
       {/* Submit Button */}

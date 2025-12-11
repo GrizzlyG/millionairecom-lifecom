@@ -1,8 +1,8 @@
-import { IconType } from "react-icons";
+import React from "react";
 
 interface AdminNavItemProps {
   selected?: boolean;
-  icon: IconType;
+  icon: React.ElementType;
   label: string;
 }
 

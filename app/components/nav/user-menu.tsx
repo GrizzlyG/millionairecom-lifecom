@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import Avatar from "../avatar";
-import { AiFillCaretDown } from "react-icons/ai";
+import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { MenuItem } from "@mui/material";
 import { signOut } from "next-auth/react";
@@ -27,19 +27,21 @@ const UserMenu: React.FC<UserMenuProps> = ({ currentUser }) => {
           className="p-1 border-[2px] border-slate-400 flex flex-row items-center gap-1 rounded-full cursor-pointer hover:shadow-md transition text-slate-100"
         >
           <Avatar src={currentUser?.image} />
-          <AiFillCaretDown />
+          <ChevronDown />
         </div>
         {isOpen && (
           <div className="absolute rounded-md shadow-md w-[170px] bg-white overflow-hidden right-0 top-12 text-sm flex flex-col cursor-pointer">
             {currentUser ? (
               <div>
-                {currentUser.role === "ADMIN" ? (
+                {currentUser.role === "ADMIN" || currentUser.role === "MANAGER" ? (
                   <div>
                     <Link href="/orders">
                       <MenuItem onClick={toggleOpen}>Your Orders</MenuItem>
                     </Link>
                     <Link href="/admin">
-                      <MenuItem onClick={toggleOpen}>Admin Dashboard</MenuItem>
+                      <MenuItem onClick={toggleOpen}>
+                        {currentUser.role === "ADMIN" ? "Admin Dashboard" : "Manager Dashboard"}
+                      </MenuItem>
                     </Link>
                   </div>
                 ) : (

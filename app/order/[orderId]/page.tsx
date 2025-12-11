@@ -8,7 +8,13 @@ interface ItemParams {
   orderId: string;
 }
 
-const Order = async ({ params }: { params: ItemParams }) => {
+const Order = async ({ 
+  params,
+  searchParams 
+}: { 
+  params: ItemParams;
+  searchParams: { token?: string }
+}) => {
   const order = await getOrderById(params);
 
   if (!order) return <NullData title="No order" />;
@@ -16,7 +22,7 @@ const Order = async ({ params }: { params: ItemParams }) => {
   return (
     <div className="p-1 sm:p-8">
       <Container>
-        <OrderDetails order={order} />
+        <OrderDetails order={order} guestToken={searchParams.token} />
         <OrderGrid order={order} />
       </Container>
     </div>

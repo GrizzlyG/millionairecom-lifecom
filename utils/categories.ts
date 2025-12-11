@@ -1,39 +1,40 @@
-import { AiOutlineDesktop, AiOutlineLaptop } from "react-icons/ai";
-import {
-  MdOutlineKeyboard,
-  MdSmartphone,
-  MdStorefront,
-  MdTv,
-  MdWatch,
-} from "react-icons/md";
+import { Store, Wine, Pizza, Coffee, UtensilsCrossed, Pencil, Sparkles, SprayCan, Laptop } from "lucide-react";
 
 export const categories = [
   {
     label: "All",
-    icon: MdStorefront,
+    icon: Store,
   },
   {
-    label: "Phone",
-    icon: MdSmartphone,
+    label: "Chilled drinks",
+    icon: Wine,
   },
   {
-    label: "Laptop",
-    icon: AiOutlineLaptop,
+    label: "Quick bites",
+    icon: Pizza,
   },
   {
-    label: "Desktop",
-    icon: AiOutlineDesktop,
+    label: "Breakfast",
+    icon: Coffee,
   },
   {
-    label: "Watch",
-    icon: MdWatch,
+    label: "To cook",
+    icon: UtensilsCrossed,
   },
   {
-    label: "Tv",
-    icon: MdTv,
+    label: "Stationeries",
+    icon: Pencil,
   },
   {
-    label: "Accessories",
-    icon: MdOutlineKeyboard,
+    label: "Personal care",
+    icon: Sparkles,
+  },
+  {
+    label: "Cleaning",
+    icon: SprayCan,
+  },
+  {
+    label: "Tech",
+    icon: Laptop,
   },
 ];

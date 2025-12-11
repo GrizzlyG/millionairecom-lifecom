@@ -6,13 +6,15 @@ import { formatPrice } from "@/utils/format-price";
 import Heading from "@/app/components/heading";
 import Status from "@/app/components/status";
 import {
-  MdCached,
-  MdClose,
-  MdDelete,
-  MdDone,
-  MdEdit,
-  MdRemoveRedEye,
-} from "react-icons/md";
+  RefreshCw,
+  X,
+  Trash2,
+  Check,
+  Pencil,
+  Eye,
+  EyeIcon,
+  EyeOff,
+} from "lucide-react";
 import ActionButton from "@/app/components/action-button";
 import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
@@ -33,6 +35,7 @@ const ManageProductsClient: React.FC<ManageProductsClientProps> = ({
   const [nameToDelete, setNameToDelete] = useState("");
   const [idToDelete, setIdToDelete] = useState("");
   const [imagesToDelete, setImagesToDelete] = useState([]);
+  const [loadingActions, setLoadingActions] = useState<{ [key: string]: boolean }>({});
   const router = useRouter();
   const storage = getStorage(firebaseApp);
   let rows: any = [];
@@ -43,9 +46,11 @@ const ManageProductsClient: React.FC<ManageProductsClientProps> = ({
         id: product.id,
         name: product.name,
         price: formatPrice(product.price),
+        dmc: formatPrice((product as any).dmc || 0),
         category: product.category,
         brand: product.brand,
         inStock: product.inStock,
+        isVisible: (product as any).isVisible ?? true,
         images: product.images,
         stock: (product as any).remainingStock ?? (product as any).stock ?? 0,
       };
@@ -53,6 +58,7 @@ const ManageProductsClient: React.FC<ManageProductsClientProps> = ({
   }
 
   const handleToggleStock = useCallback((id: string, inStock: boolean) => {
+    setLoadingActions((prev) => ({ ...prev, [`stock-${id}`]: true }));
     axios
       .put("/api/product", {
         id,
@@ -65,8 +71,31 @@ const ManageProductsClient: React.FC<ManageProductsClientProps> = ({
       .catch((error) => {
         toast.error("Oops! Something went wrong.");
         console.log(error);
+      })
+      .finally(() => {
+        setLoadingActions((prev) => ({ ...prev, [`stock-${id}`]: false }));
       });
-  }, []);
+  }, [router]);
+
+  const handleToggleVisibility = useCallback((id: string, isVisible: boolean) => {
+    setLoadingActions((prev) => ({ ...prev, [`visibility-${id}`]: true }));
+    axios
+      .put("/api/product", {
+        id,
+        isVisible: !isVisible,
+      })
+      .then((res) => {
+        toast.success("Product visibility changed.");
+        router.refresh();
+      })
+      .catch((error) => {
+        toast.error("Oops! Something went wrong.");
+        console.log(error);
+      })
+      .finally(() => {
+        setLoadingActions((prev) => ({ ...prev, [`visibility-${id}`]: false }));
+      });
+  }, [router]);
 
   const handleStockEdit = useCallback(async (params: any) => {
     // params: { id, field, value }
@@ -123,15 +152,33 @@ const ManageProductsClient: React.FC<ManageProductsClientProps> = ({
   }, []);
 
   const columns: GridColDef[] = [
-    { field: "id", headerName: "ID", width: 220 },
+    { 
+      field: "id", 
+      headerName: "ID", 
+      width: 80,
+      renderCell: (params) => {
+        const id = params.row.id;
+        return id ? id.slice(-5) : "N/A";
+      },
+    },
     { field: "name", headerName: "Name", width: 220 },
     {
       field: "price",
-      headerName: "Price(USD)",
+      headerName: "Price(₦)",
       width: 100,
       renderCell: (params) => {
         return (
           <div className="font-bold text-slate-800">{params.row.price}</div>
+        );
+      },
+    },
+    {
+      field: "dmc",
+      headerName: "DMC(₦)",
+      width: 100,
+      renderCell: (params) => {
+        return (
+          <div className="font-semibold text-blue-600">{params.row.dmc}</div>
         );
       },
     },
@@ -147,14 +194,14 @@ const ManageProductsClient: React.FC<ManageProductsClientProps> = ({
             {params.row.inStock === true ? (
               <Status
                 text="in stock"
-                icon={MdDone}
+                icon={Check}
                 bg="bg-teal-200"
                 color="text-teal-700"
               />
             ) : (
               <Status
                 text="out of stock"
-                icon={MdClose}
+                icon={X}
                 bg="bg-rose-200"
                 color="text-rose-700"
               />
@@ -173,6 +220,32 @@ const ManageProductsClient: React.FC<ManageProductsClientProps> = ({
       },
     },
     {
+      field: "isVisible",
+      headerName: "Visible",
+      width: 120,
+      renderCell: (params) => {
+        return (
+          <div>
+            {params.row.isVisible ? (
+              <Status
+                text="visible"
+                icon={EyeIcon}
+                bg="bg-blue-200"
+                color="text-blue-700"
+              />
+            ) : (
+              <Status
+                text="hidden"
+                icon={EyeOff}
+                bg="bg-gray-200"
+                color="text-gray-700"
+              />
+            )}
+          </div>
+        );
+      },
+    },
+    {
       field: "action",
       headerName: "Actions",
       width: 200,
@@ -180,31 +253,44 @@ const ManageProductsClient: React.FC<ManageProductsClientProps> = ({
         return (
           <div className="flex justify-between gap-4 w-full">
             <ActionButton
-              icon={MdCached}
+              icon={RefreshCw}
               onClick={() => {
                 handleToggleStock(params.row.id, params.row.inStock);
               }}
+              isLoading={loadingActions[`stock-${params.row.id}`]}
+              label="Stock"
             />
             <ActionButton
-              icon={MdEdit}
+              icon={params.row.isVisible ? EyeOff : EyeIcon}
+              onClick={() => {
+                handleToggleVisibility(params.row.id, params.row.isVisible);
+              }}
+              isLoading={loadingActions[`visibility-${params.row.id}`]}
+              label="Visibility"
+            />
+            <ActionButton
+              icon={Pencil}
               onClick={() => {
                 router.push(`/admin/add-products/${params.row.id}`);
               }}
+              label="Edit"
             />
             <ActionButton
-              icon={MdDelete}
+              icon={Trash2}
               onClick={() => {
                 setNameToDelete(params.row.name);
                 setIdToDelete(params.row.id);
                 setImagesToDelete(params.row.images);
                 setOpen(true);
               }}
+              label="Delete"
             />
             <ActionButton
-              icon={MdRemoveRedEye}
+              icon={Eye}
               onClick={() => {
                 router.push(`product/${params.row.id}`);
               }}
+              label="View"
             />
           </div>
         );
@@ -229,7 +315,7 @@ const ManageProductsClient: React.FC<ManageProductsClientProps> = ({
           pageSizeOptions={[9, 20]}
           checkboxSelection
           disableRowSelectionOnClick
-          onCellEditCommit={handleStockEdit}
+          {...({ onCellEditCommit: handleStockEdit } as any)}
         />
       </div>
       <AlertDialog

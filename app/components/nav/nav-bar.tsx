@@ -8,18 +8,21 @@ import CartCount from "./cart-count";
 import UserMenu from "./user-menu";
 import Categories from "./categories";
 import SearchBar from "./search-bar";
-import { IoSearchOutline } from "react-icons/io5";
+import { Search } from "lucide-react";
 import { SafeUser } from "@/types";
-import { MdArrowBackIos, MdCancel } from "react-icons/md";
+import { ChevronLeft, X } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
+import DeliveryCountdown from "../delivery-countdown";
+import NotificationButton from "../notification-button";
 
 const exo = Monoton({ subsets: ["latin"], weight: ["400"] });
 
 interface NavBarPros {
   currentUser: SafeUser | null;
+  nextDeliveryTime?: string | null;
 }
 
-const NavBar: React.FC<NavBarPros> = ({ currentUser }) => {
+const NavBar: React.FC<NavBarPros> = ({ currentUser, nextDeliveryTime }) => {
   const [searchBar, setSearchBar] = useState<boolean>(false);
   const router = useRouter();
   const path = usePathname();
@@ -29,23 +32,32 @@ const NavBar: React.FC<NavBarPros> = ({ currentUser }) => {
   };
 
   return (
-    <div className="sticky top-0 w-full bg-slate-700 z-30 shadow-xl">
+    <div className="sticky top-0 w-full bg-zinc-900 z-30 shadow-xl">
       <div className="py-4 border-b-[1px] border-slate-500">
         <Container>
           <div className="flex items-center justify-between sm:px-2 xl:px-0">
             <Link
               href="/"
-              className={`flex items-center text-white opacity-90 font-roboto text-[1.55rem] sm:text-[1.8rem] hover:scale-105 active:scale-100 transition`}
+              className="relative flex items-center text-white font-semibold text-[1.55rem] sm:text-[1.8rem] hover:scale-105 active:scale-100 transition"
             >
               {path && path.includes("/product") && (
-                <MdArrowBackIos className="text-[1.4rem] sm:text-[1.25rem] mb-1 sm:mb-[1.75px]" />
+                <ChevronLeft className="text-[1.4rem] sm:text-[1.25rem] mb-1 sm:mb-[1.75px]" />
               )}
-              <span className="text-[1.6rem] sm:text-[1.65rem]">W</span>indow{" "}
-              <span className="text-[1.6rem] sm:text-[1.65rem] ml-1">S</span>
-              hop
+              <span className="text-emerald-400">Window</span>
+              <span className="text-slate-200 ml-1">Shop</span>
+              <span className="text-emerald-400">.</span>
+              <span className="absolute -top-1 -right-12 bg-emerald-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
+                Store
+              </span>
             </Link>
 
             <div className="flex items-center gap-4 md:gap-8 xl:gap-12">
+              <DeliveryCountdown deliveryTime={nextDeliveryTime || null} />
+              
+              {currentUser && (
+                <NotificationButton userId={currentUser.id} />
+              )}
+              
               <div className="flex items-center gap-4">
                 <div
                   className={`hidden md:block opacity-0 transition 
@@ -55,7 +67,7 @@ const NavBar: React.FC<NavBarPros> = ({ currentUser }) => {
                   <SearchBar searchBar={searchBar} />
                 </div>
                 {searchBar ? (
-                  <MdCancel
+                  <X
                     className="text-[1.9rem] text-gray-200 pb-[0.1rem] cursor-pointer hidden md:block hover:scale-110 active:scale-[0.9] transition"
                     onClick={() => {
                       setSearchBar(false);
@@ -63,7 +75,7 @@ const NavBar: React.FC<NavBarPros> = ({ currentUser }) => {
                     }}
                   />
                 ) : (
-                  <IoSearchOutline
+                  <Search
                     className="text-[1.9rem] text-white pb-[0.1rem] cursor-pointer hidden md:block hover:scale-110 active:scale-[0.9] transition"
                     onClick={() => setSearchBar(true)}
                   />

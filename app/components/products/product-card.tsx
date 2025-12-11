@@ -7,9 +7,9 @@ import Image from "next/image";
 import React, { useState } from "react";
 import Link from "next/link";
 import { productRating } from "@/utils/product-rating";
-import { IoChevronDown } from "react-icons/io5";
+import { ChevronDown } from "lucide-react";
 import Status from "../status";
-import { MdDone, MdOutlineClose } from "react-icons/md";
+import { Check, X } from "lucide-react";
 import { useCart } from "@/context/cart-context";
 import { CartProductType } from "@/app/product/[productId]/product-details";
 import Button from "../button";
@@ -27,9 +27,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ data }) => {
 
   const getStockText = () => {
     if (!data.inStock || remaining === 0) return "Out of stock";
-    if (remaining > 20) return "20+ in stock";
-    if (remaining > 10) return "10+ in stock";
-    return `${remaining} in stock`;
+    if (remaining > 20) return "20+ left";
+    if (remaining > 10) return "10+ left";
+    return `${remaining} left`;
   };
 
   const handleQuantityIncrease = () => {
@@ -59,6 +59,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ data }) => {
       selectedImg: { ...data.images[0] },
       quantity,
       price: data.price,
+      dmc: data.dmc || 0,
       remainingStock: remaining,
     };
 
@@ -68,23 +69,31 @@ const ProductCard: React.FC<ProductCardProps> = ({ data }) => {
   };
 
   return (
-    <div className="col-span-1 border-[1.2px] border-slate-200 bg-slate-50 rounded-md p-2 transition hover:bg-slate-100 text-center text-sm flex flex-col h-full">
-      <div className="flex flex-col items-center w-full gap-1 flex-1">
-        {/* Product Image & Name Link */}
-        <Link href={`/product/${data.id}`}>
-          <div className="aspect-square overflow-hidden relative w-full mt-2 cursor-pointer hover:opacity-80 transition">
+    <div className="col-span-1 bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow flex flex-col h-full">
+      {/* Product Image - Full width at top */}
+      <Link href={`/product/${data.id}`}>
+        <div className="aspect-square overflow-hidden relative w-full cursor-pointer hover:opacity-90 transition bg-gray-50">
+          {data.images && data.images.length > 0 ? (
             <Image
               src={data.images[0].image}
               alt={data.name}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover"
+              priority
             />
-          </div>
-        </Link>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500">
+              No Image
+            </div>
+          )}
+        </div>
+      </Link>
 
+      {/* Product Info */}
+      <div className="flex flex-col items-center w-full gap-1 flex-1 p-3 text-center">
         <Link href={`/product/${data.id}`}>
-          <div className="font-medium text-[1.04rem] mt-3 mb-1 hover:text-slate-700 cursor-pointer transition">
+          <div className="font-medium text-[1.04rem] mb-1 hover:text-slate-700 cursor-pointer transition">
             {truncateText(data.name)}
           </div>
         </Link>
@@ -96,19 +105,19 @@ const ProductCard: React.FC<ProductCardProps> = ({ data }) => {
             size="small"
             precision={0.5}
           />
-          <IoChevronDown size={12} className="opacity-60" />
+          <ChevronDown size={12} className="opacity-60" />
           <div className="opacity-60 font-bold">{data.reviews.length}</div>
         </div>
 
         {data.list !== data.price && (
           <div className="flex flex-wrap justify-center font-normal text-sm text-slate-400 gap-2 mb-1">
-            <span className="line-through">{formatPrice(data.list)}</span>
+            <span className="line-through">{formatPrice(data.list + (data.dmc || 0))}</span>
             <Status
               text={
                 Math.round(((data.price - data.list) / data.price) * 100) +
                 "% OFF"
               }
-              icon={MdDone}
+              icon={Check}
               bg="bg-pink-600"
               color="text-white font-medium"
             />
@@ -122,12 +131,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ data }) => {
           }`}
         >
           <div className="font-semibold text-[1.3rem]">
-            {formatPrice(data.price)}
+            {formatPrice(data.price + (data.dmc || 0))}
           </div>
         </div>
 
         <div className={`${data.list === data.price && "mt-3"}`}>
-          free shipping
+          free delivery
         </div>
 
         {/* Stock Status */}
@@ -135,7 +144,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ data }) => {
           <span className="text-xs font-medium">STOCK:</span>
           <Status
             text={getStockText()}
-            icon={data.inStock && remaining > 0 ? MdDone : MdOutlineClose}
+            icon={data.inStock && remaining > 0 ? Check : X}
             bg={data.inStock && remaining > 0 ? "bg-teal-600" : "bg-pink-600"}
             color="text-white font-normal text-xs flex justify-center h-6"
           />
@@ -170,6 +179,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ data }) => {
               label="Add to Cart"
               onClick={handleAddToCart}
               small
+              roundedBottom
             />
           </div>
         </div>

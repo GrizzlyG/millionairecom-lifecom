@@ -1,23 +1,28 @@
+"use client";
+
 import React from "react";
 import Container from "../container";
 import FooterList from "./footer-list";
 import Link from "next/link";
-import { MdFacebook } from "react-icons/md";
-import {
-  AiFillInstagram,
-  AiFillTwitterCircle,
-  AiFillYoutube,
-} from "react-icons/ai";
 import { categories } from "@/utils/categories";
 import Categories from "./categories";
+import { MessageCircle } from "lucide-react";
 
-const Footer = () => {
-  const socialClasses =
-    "text-[1.6rem] hover:text-slate-50 hover:scale-[1.2] active:scale-95 transition";
+interface FooterProps {
+  whatsappNumber?: string | null;
+}
+
+const Footer: React.FC<FooterProps> = ({ whatsappNumber }) => {
   const highlight = "hover:text-slate-50 transition";
 
+  const handleWhatsAppClick = () => {
+    if (whatsappNumber) {
+      window.open(`https://wa.me/${whatsappNumber}`, "_blank");
+    }
+  };
+
   return (
-    <footer className="bg-slate-700 text-slate-200 text-sm mt-16">
+    <footer className="bg-zinc-900 text-slate-200 text-sm mt-16">
       <Container>
         <div className="px-8 flex flex-col md:flex-row justify-between pt-10 pb-4">
           <FooterList>
@@ -29,16 +34,23 @@ const Footer = () => {
 
           <FooterList>
             <h3 className="font-bold text-base mb-2">Customer Service</h3>
-            <Link href="#" className={highlight}>
-              Contact Us
-            </Link>
+            {whatsappNumber ? (
+              <button
+                onClick={handleWhatsAppClick}
+                className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition font-medium mb-2"
+              >
+                <MessageCircle size={20} />
+                Chat on WhatsApp
+              </button>
+            ) : (
+              <Link href="#" className={highlight}>
+                Contact Us
+              </Link>
+            )}
             <Link href="#" className={highlight}>
               Shipping Policy
             </Link>
-            <Link href="#" className={highlight}>
-              Returns & Exchanges
-            </Link>
-            <Link href="#" className={highlight}>
+            <Link href="/faq" className={highlight}>
               FAQs
             </Link>
           </FooterList>
@@ -46,38 +58,14 @@ const Footer = () => {
           <div className="w-full md:w-1/3 mb-6 md:mb-0">
             <h3 className="text-base font-bold mb-2">About Us</h3>
             <p className="mb-2">
-              At our electronics store, we are dedicated to providing the latest
-              and greatest devices and accessories to our customers. With a wide
-              selection of phones, TVs, laptops, watches, and accessories.
+              Why Queue --- Dress Up --- And Sweat Under the Sun?<br/>
+              Just Window Shop!
             </p>
             <p>
-              &copy; {new Date().getFullYear()} Smart Store. All rights
+              &copy; {new Date().getFullYear()} WindowShop. All rights
               reserved.
             </p>
           </div>
-          <FooterList>
-            <h3 className="font-bold text-base mb-2">Follow Us</h3>
-            <div className="flex gap-3">
-              <Link href="#">
-                <MdFacebook className={socialClasses} aria-label="Facebook" />
-              </Link>
-              <Link href="#">
-                <AiFillTwitterCircle
-                  className={socialClasses}
-                  aria-label="Twitter"
-                />
-              </Link>
-              <Link href="#">
-                <AiFillInstagram
-                  className={socialClasses}
-                  aria-label="Instagram"
-                />
-              </Link>
-              <Link href="#">
-                <AiFillYoutube className={socialClasses} aria-label="Youtube" />
-              </Link>
-            </div>
-          </FooterList>
         </div>
       </Container>
     </footer>

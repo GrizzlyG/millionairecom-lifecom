@@ -1,6 +1,8 @@
-import prisma from "@/libs/prismadb";
+import { MongoClient, ObjectId } from "mongodb";
 import { NextResponse } from "next/server";
 import getCurrentUser from "@/actions/get-current-user";
+
+const MONGO_URI = process.env.DATABASE_URL?.replace("?replicaSet=rs0", "") || "mongodb://localhost:27017/ecommerce-nextjs-app";
 
 export async function PUT(request: Request) {
   const currentUser = await getCurrentUser();
@@ -14,9 +16,19 @@ export async function PUT(request: Request) {
     return NextResponse.error();
   }
 
-  const order = await prisma.order.delete({
-    where: { id: row.id },
+  const mongoClient = new MongoClient(MONGO_URI);
+  await mongoClient.connect();
+  const db = mongoClient.db("ecommerce-nextjs-app");
+
+  const result = await db.collection("Order").deleteOne({
+    _id: new ObjectId(row.id),
   });
 
-  return NextResponse.json(order);
+  await mongoClient.close();
+
+  if (result.deletedCount === 0) {
+    return NextResponse.json({ error: "Order not found" }, { status: 404 });
+  }
+
+  return NextResponse.json({ success: true, deletedCount: result.deletedCount });
 }

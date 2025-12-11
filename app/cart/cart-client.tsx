@@ -3,14 +3,13 @@
 import { useCart } from "@/context/cart-context";
 import Link from "next/link";
 import React from "react";
-import { MdArrowBack } from "react-icons/md";
+import { ArrowLeft, ShoppingCart } from "lucide-react";
 import Heading from "../components/heading";
 import Button from "../components/button";
 import ItemContent from "./item-content";
 import { formatPrice } from "@/utils/format-price";
 import { SafeUser } from "@/types";
 import { useRouter } from "next/navigation";
-import { IoCartOutline } from "react-icons/io5";
 
 interface CartClientProps {
   currentUser: SafeUser | null;
@@ -27,7 +26,7 @@ const CartClient: React.FC<CartClientProps> = ({ currentUser }) => {
         style={{ minHeight: "calc(100vh - 430px)" }}
       >
         <div className="p-4 sm:p-6 border-4 border-slate-700 rounded-full">
-          <IoCartOutline size={70} />
+          <ShoppingCart size={70} />
         </div>
         <div className="flex flex-col items-start justify-center">
           <div className="text-2xl">Your cart is empty</div>
@@ -36,7 +35,7 @@ const CartClient: React.FC<CartClientProps> = ({ currentUser }) => {
               href={"/"}
               className="text-slate-500 flex items-center justify gap-1 mt-2 hover:scale-110 active:scale-100 transition"
             >
-              <MdArrowBack />
+              <ArrowLeft />
               <span>Start Shopping</span>
             </Link>
           </div>
@@ -60,7 +59,7 @@ const CartClient: React.FC<CartClientProps> = ({ currentUser }) => {
             return <ItemContent key={item.id} item={item} />;
           })}
       </div>
-      <div className="border-t-[1.5px] border-slate-200 py-4 flex justify-between gap-4">
+      <div className="border-t-[1.5px] border-slate-300 py-4 flex justify-between gap-4">
         <div className="w-[90px]">
           <Button
             label="Clear Cart"
@@ -79,17 +78,14 @@ const CartClient: React.FC<CartClientProps> = ({ currentUser }) => {
             Taxes and shipping calculated at checkout
           </p>
           <Button
-            label={currentUser ? "Checkout" : "Login to Checkout"}
-            outline={currentUser ? false : true}
-            onClick={() => {
-              currentUser ? router.push("/checkout") : router.push("/login");
-            }}
+            label="Checkout"
+            onClick={() => router.push("/checkout")}
           />
           <Link
             href={"/"}
             className="text-slate-500 flex items-center gap-1 mt-2  hover:scale-110 active:scale-100 transition"
           >
-            <MdArrowBack />
+            <ArrowLeft />
             <span>Continue Shopping</span>
           </Link>
         </div>

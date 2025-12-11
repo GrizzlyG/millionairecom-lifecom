@@ -17,16 +17,33 @@ const Product = async ({ params }: { params: ItemParams }) => {
   if (!product)
     return <NullData title="Oops! Product with the give id does not exist." />;
 
+  // Serialize product to ensure all fields are passed to client component
+  const serializedProduct = {
+    ...product,
+    dmc: product.dmc ?? 0,
+    createdAt: product.createdAt?.toISOString() ?? new Date().toISOString(),
+    updatedAt: product.updatedAt?.toISOString() ?? new Date().toISOString(),
+    reviews: product.reviews.map((review: any) => ({
+      ...review,
+      createdDate: review.createdDate?.toISOString() ?? new Date().toISOString(),
+      user: {
+        ...review.user,
+        createdAt: review.user.createdAt?.toISOString() ?? new Date().toISOString(),
+        updatedAt: review.user.updatedAt?.toISOString() ?? new Date().toISOString(),
+      }
+    }))
+  };
+
   return (
     <div className="p-8">
       <Container>
-        <ProductDetails product={product} />
+        <ProductDetails product={serializedProduct} />
         <div className="flex flex-col-reverse sm:flex-row mt-12 sm:mt-20 gap-4">
           <div className="w-full sm:w-1/2">
-            <AddRating product={product} user={user} />
+            <AddRating product={serializedProduct} user={user} />
           </div>
           <div className="sm:w-1/2">
-            <ListRating product={product} />
+            <ListRating product={serializedProduct} />
           </div>
         </div>
       </Container>

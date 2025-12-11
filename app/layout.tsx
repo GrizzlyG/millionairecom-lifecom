@@ -1,17 +1,20 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { Outfit } from "next/font/google";
 import NavBar from "./components/nav/nav-bar";
 import Footer from "./components/footer/footer";
 import CartProvider from "@/provider/cart-provider";
 import { Toaster } from "react-hot-toast";
 import getCurrentUser from "@/actions/get-current-user";
+import CustomerNotifications from "./components/customer/customer-notifications";
+import TopLoader from "./components/top-loader";
+import getSettings from "@/actions/get-settings";
 
-const poppins = Poppins({ subsets: ["latin"], weight: ["400", "700"] });
+const outfit = Outfit({ subsets: ["latin"], weight: ["400", "500", "600"] });
 
 export const metadata: Metadata = {
-  title: "SmartStore",
-  description: "SmartStore Portfolio App",
+  title: "WindowShop",
+  description: "WindowShop Portfolio App",
 };
 
 export default async function RootLayout({
@@ -20,11 +23,12 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const currentUser = await getCurrentUser();
+  const settings = await getSettings();
 
   return (
     <html lang="en">
       <body
-        className={`${poppins.className}, flex flex-col min-h-screen text-slate-700 bg-slate-100`}
+        className={`${outfit.className}, flex flex-col min-h-screen text-zinc-800 bg-white`}
       >
         <Toaster
           containerStyle={{ top: "88px" }}
@@ -36,15 +40,19 @@ export default async function RootLayout({
               background: "rgb(51, 65, 85)",
               color: "#fff",
               fontSize: "16px",
-              fontFamily: poppins.style.fontFamily,
+              fontFamily: outfit.style.fontFamily,
             },
           }}
         />
 
         <CartProvider>
-          <NavBar currentUser={currentUser} />
+          <TopLoader />
+          {currentUser && currentUser.role !== "ADMIN" && (
+            <CustomerNotifications userId={currentUser.id} />
+          )}
+          <NavBar currentUser={currentUser} nextDeliveryTime={settings?.nextDeliveryTime} />
           <main className="flex-grow">{children}</main>
-          <Footer />
+          <Footer whatsappNumber={(settings as any)?.whatsappNumber} />
         </CartProvider>
       </body>
     </html>

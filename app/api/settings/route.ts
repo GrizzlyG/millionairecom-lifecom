@@ -12,6 +12,8 @@ export async function GET() {
         bankName: "",
         bankAccountNumber: "",
         accountHolderName: "",
+        hostels: [],
+        spf: 100,
       });
     }
 
@@ -20,6 +22,8 @@ export async function GET() {
       bankName: settings.bankName || "",
       bankAccountNumber: settings.bankAccountNumber || "",
       accountHolderName: settings.accountHolderName || "",
+      hostels: settings.hostels || [],
+      spf: settings.spf || 100,
       updatedAt: settings.updatedAt,
     });
   } catch (error) {
@@ -29,6 +33,8 @@ export async function GET() {
       bankName: "",
       bankAccountNumber: "",
       accountHolderName: "",
+      hostels: [],
+      spf: 100,
     });
   }
 }
@@ -46,19 +52,23 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { bankName, bankAccountNumber, accountHolderName } = body;
+    const { bankName, bankAccountNumber, accountHolderName, hostels } = body;
 
     const db = await getMongoDb();
+    
+    const updateData: any = {
+      updatedAt: new Date(),
+    };
+
+    if (bankName !== undefined) updateData.bankName = bankName;
+    if (bankAccountNumber !== undefined) updateData.bankAccountNumber = bankAccountNumber;
+    if (accountHolderName !== undefined) updateData.accountHolderName = accountHolderName;
+    if (hostels !== undefined) updateData.hostels = hostels;
     
     await db.collection("Settings").updateOne(
       { _id: "settings" },
       {
-        $set: {
-          bankName,
-          bankAccountNumber,
-          accountHolderName,
-          updatedAt: new Date(),
-        },
+        $set: updateData,
       },
       { upsert: true }
     );
@@ -70,6 +80,7 @@ export async function PUT(request: Request) {
       bankName: settings?.bankName || "",
       bankAccountNumber: settings?.bankAccountNumber || "",
       accountHolderName: settings?.accountHolderName || "",
+      hostels: settings?.hostels || [],
       updatedAt: settings?.updatedAt,
     });
   } catch (error) {

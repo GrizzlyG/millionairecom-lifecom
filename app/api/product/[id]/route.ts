@@ -1,6 +1,7 @@
 import getCurrentUser from "@/actions/get-current-user";
 import prisma from "@/libs/prismadb";
 import { NextResponse } from "next/server";
+import { MongoClient, ObjectId } from "mongodb";
 
 export async function DELETE(
   request: Request,
@@ -12,11 +13,18 @@ export async function DELETE(
     return NextResponse.error();
   }
 
-  const product = await prisma.product.delete({
-    where: { id: params.id },
-  });
-
-  return NextResponse.json(product);
+  const mongoClient = new MongoClient(process.env.DATABASE_URL!);
+  await mongoClient.connect();
+  
+  try {
+    const db = mongoClient.db("ecommerce-nextjs-app");
+    const product = await db.collection("Product").findOneAndDelete({
+      _id: new ObjectId(params.id)
+    });
+    return NextResponse.json(product);
+  } finally {
+    await mongoClient.close();
+  }
 }
 
 export async function PUT(
@@ -34,6 +42,7 @@ export async function PUT(
     name,
     description,
     price,
+    dmc,
     brand,
     category,
     inStock,
@@ -41,6 +50,7 @@ export async function PUT(
     list,
     stock,
     remainingStock,
+    isVisible,
   } = body;
 
   // Determine remaining and inStock flag
@@ -53,6 +63,7 @@ export async function PUT(
       : undefined;
 
   const inStockFlag = remainingNum !== undefined ? remainingNum > 0 : inStock;
+  const dmcValue = dmc !== undefined ? parseFloat(dmc) : undefined;
 
   const updateData: any = {
     name,
@@ -64,14 +75,25 @@ export async function PUT(
     list: parseFloat(list),
   };
 
+  if (dmcValue !== undefined) updateData.dmc = dmcValue;
   if (inStockFlag !== undefined) updateData.inStock = inStockFlag;
   if (stockNum !== undefined) updateData.stock = stockNum;
   if (remainingNum !== undefined) updateData.remainingStock = remainingNum;
+  if (isVisible !== undefined) updateData.isVisible = isVisible;
+  updateData.updatedAt = new Date();
 
-  const product = await prisma.product.update({
-    where: { id: params.id },
-    data: updateData,
-  });
-
-  return NextResponse.json(product);
+  const mongoClient = new MongoClient(process.env.DATABASE_URL!);
+  await mongoClient.connect();
+  
+  try {
+    const db = mongoClient.db("ecommerce-nextjs-app");
+    const result = await db.collection("Product").findOneAndUpdate(
+      { _id: new ObjectId(params.id) },
+      { $set: updateData },
+      { returnDocument: "after" }
+    );
+    return NextResponse.json(result);
+  } finally {
+    await mongoClient.close();
+  }
 }

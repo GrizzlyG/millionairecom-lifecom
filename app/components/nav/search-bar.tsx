@@ -53,7 +53,7 @@ const SearchBar: React.FC<SearchBarType> = ({ searchBar }) => {
         ref={searchInputRef}
         autoComplete="off"
         type="text"
-        placeholder="Explore SmartStore"
+        placeholder="Explore WindowShop"
         className="px-2 border-[1px] border-r-0 boder-gray-400 bg-slate-100 h-8 rounded-l-md focus:outline-none focus:border-[0.5px] focus:border-slate-500 w-50 xl:w-[200px]"
       />
       <button className="bg-slate-900 border-[1px] border-l-0 border-gray-400 opacity-75 hover:bg-opacity-70 h-8 font-semibold text-slate-50 p-[0.3rem] w-20 rounded-r-md active:scale-95 transition flex items-center justify-center">

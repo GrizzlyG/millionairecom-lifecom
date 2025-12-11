@@ -6,15 +6,17 @@ import { formatPrice } from "@/utils/format-price";
 import Heading from "@/app/components/heading";
 import Status from "@/app/components/status";
 import {
-  MdAccessTimeFilled,
-  MdDelete,
-  MdDeliveryDining,
-  MdDone,
-  MdRemoveRedEye,
-  MdPayments,
-} from "react-icons/md";
+  Clock,
+  Trash2,
+  Truck,
+  Check,
+  Eye,
+  CreditCard,
+  List,
+  XCircle,
+} from "lucide-react";
 import ActionButton from "@/app/components/action-button";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -37,6 +39,48 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
   const [orderToDelete, setOrderToDelete] = useState("");
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingActions, setLoadingActions] = useState<{ [key: string]: boolean }>({});
+  const eventSourceRef = useRef<EventSource | null>(null);
+
+  // Listen to SSE for order updates
+  useEffect(() => {
+    const connectSSE = () => {
+      const eventSource = new EventSource("/api/admin/notifications/stream");
+      eventSourceRef.current = eventSource;
+
+      eventSource.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          
+          if (message.type === "notification") {
+            // Refresh orders when payment status changes
+            router.refresh();
+          }
+        } catch (error) {
+          console.error("Error parsing SSE message:", error);
+        }
+      };
+
+      eventSource.onerror = () => {
+        eventSource.close();
+        // Reconnect after 5 seconds
+        setTimeout(() => {
+          if (eventSourceRef.current === eventSource) {
+            connectSSE();
+          }
+        }, 5000);
+      };
+    };
+
+    connectSSE();
+
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+    };
+  }, [router]);
 
   let rows: any = [];
 
@@ -50,11 +94,13 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
         paymentConfirmed: order.paymentConfirmed,
         date: moment(order.createDate).fromNow(),
         deliveryStatus: order.deliveryStatus,
+        cancelled: order.cancelled,
       };
     });
   }
 
   const handleDispatch = useCallback((id: string) => {
+    setLoadingActions((prev) => ({ ...prev, [`dispatch-${id}`]: true }));
     axios
       .put("/api/order", {
         id,
@@ -67,10 +113,14 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
       .catch((error) => {
         toast.error("Oops! Something went wrong.");
         console.log(error);
+      })
+      .finally(() => {
+        setLoadingActions((prev) => ({ ...prev, [`dispatch-${id}`]: false }));
       });
   }, [router]);
 
   const handleDeliver = useCallback((id: string) => {
+    setLoadingActions((prev) => ({ ...prev, [`deliver-${id}`]: true }));
     axios
       .put("/api/order", {
         id,
@@ -83,19 +133,26 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
       .catch((error) => {
         toast.error("Oops! Something went wrong.");
         console.log(error);
+      })
+      .finally(() => {
+        setLoadingActions((prev) => ({ ...prev, [`deliver-${id}`]: false }));
       });
   }, [router]);
 
   const handleConfirmPayment = useCallback((id: string) => {
+    setLoadingActions((prev) => ({ ...prev, [`payment-${id}`]: true }));
     axios
       .put(`/api/admin/order/${id}/confirm-payment`, {})
       .then((res) => {
-        toast.success("Payment Confirmed.");
+        // Don't show toast here - SSE notification will handle it
         router.refresh();
       })
       .catch((error) => {
         toast.error("Failed to confirm payment.");
         console.log(error);
+      })
+      .finally(() => {
+        setLoadingActions((prev) => ({ ...prev, [`payment-${id}`]: false }));
       });
   }, [router]);
 
@@ -153,6 +210,16 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
     }
   }, [selectedRows, router]);
 
+  const handleGenerateOrderList = () => {
+    if (selectedRows.length === 0) {
+      toast.error("Please select at least one order");
+      return;
+    }
+    
+    const orderIds = selectedRows.join(",");
+    router.push(`/admin/order-list?orders=${orderIds}`);
+  };
+
   const handleDeleteOrder = useCallback((row: string) => {
     axios
       .put("/api/delete-order", {
@@ -169,24 +236,44 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
       });
   }, [router]);
 
+  const handleCancelOrder = useCallback((id: string) => {
+    setLoadingActions((prev) => ({ ...prev, [`cancel-${id}`]: true }));
+    axios
+      .put("/api/order/cancel", {
+        orderId: id,
+      })
+      .then((res) => {
+        if (res.data.refundAmount > 0) {
+          toast.success(`Order cancelled. Refund: ${formatPrice(res.data.refundAmount)}`);
+        } else {
+          toast.success("Order cancelled successfully.");
+        }
+        router.refresh();
+      })
+      .catch((error) => {
+        toast.error(error.response?.data?.error || "Failed to cancel order.");
+        console.log(error);
+      })
+      .finally(() => {
+        setLoadingActions((prev) => ({ ...prev, [`cancel-${id}`]: false }));
+      });
+  }, [router]);
+
   const columns: GridColDef[] = [
     {
       field: "id",
       headerName: "ID",
-      width: 220,
+      width: 80,
       renderCell: (params) => {
         const id = params.row.id as string | undefined;
-        const shortened =
-          id && typeof id === "string" && id.length > 12
-            ? `${id.slice(0, 8)}...${id.slice(-4)}`
-            : id;
+        const shortened = id ? id.slice(-5) : "N/A";
         return <div className="font-mono text-sm text-slate-800">{shortened}</div>;
       },
     },
     { field: "customer", headerName: "Customer Name", width: 130 },
     {
       field: "amount",
-      headerName: "Amount(USD)",
+      headerName: "Amount(NGN)",
       width: 130,
       renderCell: (params) => {
         return (
@@ -204,7 +291,7 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
             {params.row.paymentStatus === "pending" ? (
               <Status
                 text="pending"
-                icon={MdAccessTimeFilled}
+                icon={Clock}
                 bg="bg-slate-200"
                 color="text-slate-700"
               />
@@ -212,7 +299,7 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
               params.row.paymentStatus === "complete" && (
                 <Status
                   text="completed" 
-                  icon={MdDone}
+                  icon={Check}
                   bg="bg-green-200"
                   color="text-green-700"
                 />
@@ -229,17 +316,24 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
       renderCell: (params) => {
         return (
           <div>
-            {params.row.deliveryStatus === "pending" ? (
+            {params.row.cancelled ? (
+              <Status
+                text="cancelled"
+                icon={XCircle}
+                bg="bg-red-200"
+                color="text-red-700"
+              />
+            ) : params.row.deliveryStatus === "pending" ? (
               <Status
                 text="pending"
-                icon={MdAccessTimeFilled}
+                icon={Clock}
                 bg="bg-slate-200"
                 color="text-slate-700"
               />
             ) : params.row.deliveryStatus === "dispatched" ? (
               <Status
                 text="dispatched"
-                icon={MdDeliveryDining}
+                icon={Truck}
                 bg="bg-purple-200"
                 color="text-purple-700"
               />
@@ -247,7 +341,7 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
               params.row.deliveryStatus === "delivered" && (
                 <Status
                   text="delivered"
-                  icon={MdDone}
+                  icon={Check}
                   bg="bg-green-200"
                   color="text-green-700"
                 />
@@ -267,14 +361,14 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
             {params.row.paymentConfirmed ? (
               <Status
                 text="confirmed"
-                icon={MdDone}
+                icon={Check}
                 bg="bg-green-200"
                 color="text-green-700"
               />
             ) : (
               <Status
                 text="awaiting"
-                icon={MdAccessTimeFilled}
+                icon={Clock}
                 bg="bg-yellow-200"
                 color="text-yellow-700"
               />
@@ -293,38 +387,58 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
           <div className="flex gap-2 flex-wrap">
             {params.row.paymentStatus === "complete" && !params.row.paymentConfirmed && (
               <ActionButton
-                icon={MdPayments}
+                icon={CreditCard}
                 onClick={() => {
                   handleConfirmPayment(params.row.id);
                 }}
+                isLoading={loadingActions[`payment-${params.row.id}`]}
+                label="Confirm"
               />
             )}
+            {!params.row.cancelled && params.row.deliveryStatus !== "delivered" && (
+              <>
+                <ActionButton
+                  icon={Truck}
+                  onClick={() => {
+                    handleDispatch(params.row.id);
+                  }}
+                  isLoading={loadingActions[`dispatch-${params.row.id}`]}
+                  label="Dispatch"
+                />
+                <ActionButton
+                  icon={Check}
+                  onClick={() => {
+                    handleDeliver(params.row.id);
+                  }}
+                  isLoading={loadingActions[`deliver-${params.row.id}`]}
+                  label="Deliver"
+                />
+                <ActionButton
+                  icon={XCircle}
+                  onClick={() => {
+                    handleCancelOrder(params.row.id);
+                  }}
+                  isLoading={loadingActions[`cancel-${params.row.id}`]}
+                  label="Cancel"
+                />
+              </>
+            )}
             <ActionButton
-              icon={MdDeliveryDining}
-              onClick={() => {
-                handleDispatch(params.row.id);
-              }}
-            />
-            <ActionButton
-              icon={MdDone}
-              onClick={() => {
-                handleDeliver(params.row.id);
-              }}
-            />
-            <ActionButton
-              icon={MdRemoveRedEye}
+              icon={Eye}
               onClick={() => {
                 router.push(`/order/${params.row.id}`);
               }}
+              label="View"
             />
-            {params.row.paymentStatus === "pending" && (
+            {params.row.paymentStatus === "pending" && !params.row.cancelled && (
               <ActionButton
-                icon={MdDelete}
+                icon={Trash2}
                 onClick={() => {
                   setNameToDelete(params.row.customer);
                   setOrderToDelete(params.row);
                   setOpen(true);
                 }}
+                label="Delete"
               />
             )}
           </div>
@@ -346,6 +460,13 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
             {selectedRows.length} order(s) selected
           </span>
           <div className="flex gap-2">
+            <button
+              onClick={handleGenerateOrderList}
+              className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-1"
+            >
+              <List size={16} />
+              Generate List
+            </button>
             <button
               onClick={handleBatchDispatch}
               disabled={isLoading}

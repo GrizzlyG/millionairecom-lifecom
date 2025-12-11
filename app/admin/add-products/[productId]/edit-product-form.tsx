@@ -48,7 +48,9 @@ const EditProductForm = ({ product }: { product: Product }) => {
     setCustomValue("category", product.category);
     setCustomValue("inStock", product.inStock);
     setCustomValue("stock", (product as any).stock ?? (product as any).remainingStock ?? 0);
+    setCustomValue("isVisible", (product as any).isVisible ?? true);
     setCustomValue("price", product.price);
+    setCustomValue("dmc", (product as any).dmc || 0);
     setCustomValue("list", product.list);
     setOldImages(product.images);
   }, []);
@@ -67,8 +69,10 @@ const EditProductForm = ({ product }: { product: Product }) => {
       category: "",
       inStock: false,
       stock: 0,
+      isVisible: true,
       images: [],
       price: "",
+      dmc: "",
       list: "",
     },
   });
@@ -159,6 +163,7 @@ const EditProductForm = ({ product }: { product: Product }) => {
     }
 
     const list = data.list === "" || data.list === 0 ? data.price : data.list;
+    const dmc = data.dmc === "" || data.dmc === 0 ? 0 : Number(data.dmc);
 
     const mergedImages = [...product.images, ...uploadedImages];
 
@@ -166,6 +171,7 @@ const EditProductForm = ({ product }: { product: Product }) => {
       ...data,
       images: mergedImages,
       list: list,
+      dmc: dmc,
       stock: data.stock !== undefined ? Number(data.stock) : undefined,
       remainingStock:
         data.remainingStock !== undefined
@@ -235,6 +241,14 @@ const EditProductForm = ({ product }: { product: Product }) => {
           required
         />
         <Input
+          id="dmc"
+          label="DMC"
+          disabled={isLoading}
+          register={register}
+          errors={errors}
+          type="number"
+        />
+        <Input
           id="list"
           label="List"
           disabled={isLoading}
@@ -244,7 +258,7 @@ const EditProductForm = ({ product }: { product: Product }) => {
         />
         <Input
           id="stock"
-          label="Stock Quantity"
+          label="No. in Stock"
           disabled={isLoading}
           register={register}
           errors={errors}
@@ -271,6 +285,11 @@ const EditProductForm = ({ product }: { product: Product }) => {
         id="inStock"
         register={register}
         label="This product is in stock"
+      />
+      <CustomCheckbox
+        id="isVisible"
+        register={register}
+        label="Make this product visible to customers"
       />
       <div className="w-full font-medium">
         <div className="mb-2 font-semibold">Select a Category</div>

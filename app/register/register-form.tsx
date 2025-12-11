@@ -7,7 +7,7 @@ import HorizontalLine from "../components/horizontal-line";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import Button from "../components/button";
 import Link from "next/link";
-import { AiOutlineGoogle } from "react-icons/ai";
+import { Chrome } from "lucide-react";
 import toast from "react-hot-toast";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -76,7 +76,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ currentUser }) => {
 
   return (
     <>
-      <Heading title="Sign up for SmartStore" custom="mb-1" />
+      <Heading title="Sign up for WindowShop" custom="mb-1" />
       <Input
         id="name"
         label="Name"
@@ -108,7 +108,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ currentUser }) => {
       />
       <HorizontalLine or />
       <Button
-        icon={AiOutlineGoogle}
+        icon={Chrome}
         label="Sign up with Google"
         onClick={() => signIn("google")}
         outline

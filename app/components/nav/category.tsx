@@ -1,11 +1,11 @@
 "use client";
 
-import { IconType } from "react-icons";
+import React from "react";
 import useCategories from "@/hooks/use-categories";
 
 interface CategoryProps {
   label: string;
-  icon: IconType;
+  icon: React.ElementType;
   selected?: boolean;
 }
 

@@ -22,7 +22,7 @@ const ItemContent: React.FC<ItemContentProps> = ({ item }) => {
   } = useCart();
 
   return (
-    <div className="grid grid-cols-5 text-xs md:text-sm gap-4 border-t-[1.5px] border-slate-200 py-4 items-center">
+    <div className="grid grid-cols-5 text-xs md:text-sm gap-4 border-t-[1.5px] border-slate-300 py-4 items-center">
       <div className="col-span-2 justify-self-start flex gap-2 md:gap-4">
         <Link href={`/product/${item.id}`}>
           <div className="relative w-[70px] aspect-square">
@@ -51,7 +51,7 @@ const ItemContent: React.FC<ItemContentProps> = ({ item }) => {
         </div>
       </div>
       <div className="justify-self-center pl-4 sm:pl-0">
-        {formatPrice(item.price)}
+        {formatPrice(item.price + (item.dmc || 0))}
       </div>
       <div className="justify-self-center pl-4 sm:pl-0">
         <SetQuantity
@@ -63,7 +63,7 @@ const ItemContent: React.FC<ItemContentProps> = ({ item }) => {
         />
       </div>
       <div className="justify-self-end font-semibold">
-        {formatPrice(item.price * item.quantity)}
+        {formatPrice((item.price + (item.dmc || 0)) * item.quantity)}
       </div>
     </div>
   );

@@ -20,6 +20,9 @@ export default async function getProducts(params: IProductParams) {
       query.category = category;
     }
 
+    // Only show visible products to customers
+    query.isVisible = true;
+
     const products = await prisma.product.findMany({
       where: {
         ...query,

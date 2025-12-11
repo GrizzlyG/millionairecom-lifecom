@@ -4,6 +4,9 @@ import getCurrentUser from "@/actions/get-current-user";
 import NullData from "@/app/components/null-data";
 import getOrders from "@/actions/get-orders";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const ManageOrders = async () => {
   const orders = await getOrders();
   const currentUser = await getCurrentUser();

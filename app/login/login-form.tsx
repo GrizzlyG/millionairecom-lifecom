@@ -7,7 +7,7 @@ import HorizontalLine from "../components/horizontal-line";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import Button from "../components/button";
 import Link from "next/link";
-import { AiOutlineGoogle } from "react-icons/ai";
+import { Chrome } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -63,7 +63,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ currentUser }) => {
 
   return (
     <>
-      <Heading title="Sing in to SmartStore" custom="mb-1" />
+      <Heading title="Sign in to WindowShop" custom="mb-1" />
       <Input
         id="email"
         label="Email"
@@ -87,7 +87,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ currentUser }) => {
       />
       <HorizontalLine or />
       <Button
-        icon={AiOutlineGoogle}
+        icon={Chrome}
         label="Continue with Google"
         onClick={() => signIn("google")}
         outline

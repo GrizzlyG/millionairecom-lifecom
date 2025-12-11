@@ -20,9 +20,6 @@ export async function connectToDatabase() {
   
   cachedConnection = {
     prisma,
-    async executeRaw(operation: string, params?: any[]) {
-      return prisma.$executeRawUnsafe(operation, ...(params || []));
-    },
   };
 
   return cachedConnection;

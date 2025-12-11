@@ -5,13 +5,14 @@ import Status from "@/app/components/status";
 import { formatPrice } from "@/utils/format-price";
 import { Order } from "@prisma/client";
 import moment from "moment";
-import { MdAccessTimeFilled, MdDeliveryDining, MdDone } from "react-icons/md";
+import { Clock, Truck, Check } from "lucide-react";
 import { use, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
 interface OrderDetailsProps {
   order: Order;
+  guestToken?: string;
 }
 
 interface BankDetails {
@@ -21,7 +22,7 @@ interface BankDetails {
 }
 
 
-const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
+const OrderDetails: React.FC<OrderDetailsProps> = ({ order, guestToken }) => {
   const [bankDetails, setBankDetails] = useState<BankDetails | null>(null);
   const [hasClaimedPayment, setHasClaimedPayment] = useState(order.paymentClaimed || false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,7 +48,10 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
       const res = await fetch(`/api/order/${order.id}/mark-payment-confirmed`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ claimed: newState }),
+        body: JSON.stringify({ 
+          claimed: newState,
+          guestToken: guestToken 
+        }),
       });
 
       if (!res.ok) {
@@ -111,18 +115,18 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
         <div className="flex gap-2 items-center">
           <div>Payment status:</div>
           <div>
-            {!order.paymentClaimed ? (
+            {!hasClaimedPayment ? (
               <Status
                 text="pending"
-                icon={MdAccessTimeFilled}
+                icon={Clock}
                 bg="bg-slate-200"
                 color="text-slate-700"
               />
             ) : (
-              order.paymentClaimed && (
+              hasClaimedPayment && (
                 <Status
                   text="completed"
-                  icon={MdDone}
+                  icon={Check}
                   bg="bg-green-200"
                   color="text-green-700"
                 />
@@ -138,14 +142,14 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
             {order.paymentConfirmed ? (
               <Status
                 text="confirmed"
-                icon={MdDone}
+                icon={Check}
                 bg="bg-green-200"
                 color="text-green-700"
               />
             ) : (
               <Status
                 text="awaiting confirmation"
-                icon={MdAccessTimeFilled}
+                icon={Clock}
                 bg="bg-yellow-200"
                 color="text-yellow-700"
               />
@@ -159,14 +163,14 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
             {order.deliveryStatus === "pending" ? (
               <Status
                 text="pending"
-                icon={MdAccessTimeFilled}
+                icon={Clock}
                 bg="bg-slate-200"
                 color="text-slate-700"
               />
             ) : order.deliveryStatus === "dispatched" ? (
               <Status
                 text="dispatched"
-                icon={MdDeliveryDining}
+                icon={Truck}
                 bg="bg-purple-200"
                 color="text-purple-700"
               />
@@ -174,7 +178,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
               order.deliveryStatus === "delivered" && (
                 <Status
                   text="delivered"
-                  icon={MdDone}
+                  icon={Check}
                   bg="bg-green-200"
                   color="text-green-700"
                 />
@@ -260,12 +264,27 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
           </div>
           <div className="space-y-2">
             {(() => {
+              if (!order.address) {
+                return <div>No address provided</div>;
+              }
+              
               const parts: string[] = [];
+              if (order.address?.name) parts.push(`Name: ${order.address.name}`);
+              if (order.address?.phone) parts.push(`Phone: ${order.address.phone}`);
+              if (order.address?.address) parts.push(`Address: ${order.address.address}`);
               if (order.address?.hostel) parts.push(order.address.hostel);
 
-              const full = parts.join(", ") || "No address provided";
+              if (parts.length === 0) {
+                return <div>No address provided</div>;
+              }
 
-              return <div>{full}</div>;
+              return (
+                <div className="space-y-1">
+                  {parts.map((part, i) => (
+                    <div key={i}>{part}</div>
+                  ))}
+                </div>
+              );
             })()}
           </div>
         </div>

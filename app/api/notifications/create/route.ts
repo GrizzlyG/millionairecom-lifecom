@@ -1,5 +1,7 @@
-import prisma from "@/libs/prismadb";
+import { MongoClient } from "mongodb";
 import { NextResponse } from "next/server";
+
+const MONGO_URI = process.env.DATABASE_URL?.replace("?replicaSet=rs0", "") || "mongodb://localhost:27017/ecommerce-nextjs-app";
 
 export async function POST(request: Request) {
   try {
@@ -10,15 +12,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing title or body" }, { status: 400 });
     }
 
-    const notification = await (prisma.notification as any).create({
-      data: {
-        title,
-        body: message,
-        orderId: orderId || null,
-      },
+    const mongoClient = new MongoClient(MONGO_URI);
+    await mongoClient.connect();
+    const db = mongoClient.db("ecommerce-nextjs-app");
+
+    const notification = await db.collection("Notification").insertOne({
+      title,
+      body: message,
+      orderId: orderId || null,
+      read: false,
+      createdAt: new Date(),
     });
 
-    return NextResponse.json(notification);
+    const insertedNotification = await db.collection("Notification").findOne({ _id: notification.insertedId });
+    
+    await mongoClient.close();
+
+    return NextResponse.json(insertedNotification);
   } catch (error) {
     console.error("Create notification error:", error);
     return NextResponse.json({ error: "Failed to create notification" }, { status: 500 });

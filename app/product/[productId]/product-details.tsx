@@ -8,7 +8,7 @@ import SetQuantity from "@/app/components/products/set-quantity";
 import Button from "@/app/components/button";
 import ProductImage from "@/app/components/products/product-image";
 import { useCart } from "@/context/cart-context";
-import { MdCheckCircle, MdDone, MdOutlineClose } from "react-icons/md";
+import { CheckCircle, Check, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { formatPrice } from "@/utils/format-price";
@@ -26,6 +26,7 @@ export type CartProductType = {
   selectedImg: SelectedImgType;
   quantity: number;
   price: number;
+  dmc: number;
   remainingStock?: number;
 };
 
@@ -41,6 +42,8 @@ const Horizontal = () => {
 };
 
 const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
+  console.log("Product in client component:", { id: product.id, name: product.name, price: product.price, dmc: product.dmc });
+  
   const { cartProducts, handleAddProductToCart } = useCart();
   const [isProductInCart, setIsProductInCart] = useState<boolean>(false);
   const [cartProduct, setCartProduct] = useState<CartProductType>({
@@ -52,6 +55,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
     selectedImg: { ...product.images[0] },
     quantity: 1,
     price: product.price,
+    dmc: product.dmc || 0,
     remainingStock: product.remainingStock ?? product.stock ?? 0,
   });
   const router = useRouter();
@@ -145,7 +149,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
               return (
                 <Status
                   text={stockText}
-                  icon={product.inStock ? MdDone : MdOutlineClose}
+                  icon={product.inStock ? Check : X}
                   bg={product.inStock ? "bg-teal-600" : "bg-pink-600"}
                   color="text-white font-normal flex justify-center h-8"
                 />
@@ -171,7 +175,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
           {product.list !== product.price && (
             <div className="flex flex-wrap font-normal text-md text-slate-400 gap-2 mb-1">
               <span className="line-through text-2xl">
-                {formatPrice(product.list * cartProduct.quantity)}
+                {formatPrice((product.list + (product.dmc || 0)) * cartProduct.quantity)}
               </span>
               <Status
                 text={
@@ -179,7 +183,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
                     ((product.price - product.list) / product.price) * 100
                   ) + "% OFF"
                 }
-                icon={MdDone}
+                icon={Check}
                 bg="bg-pink-600"
                 color="text-white font-medium"
               />
@@ -188,14 +192,14 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
           <div className="flex gap-4 text-3xl text-slate-600 font-bold">
             <span>Total</span>
             <div>
-              {formatPrice(product.price * cartProduct.quantity)}
+              {formatPrice((product.price + (product.dmc || 0)) * cartProduct.quantity)}
             </div>
           </div>
           <Horizontal />
 
           {isProductInCart && (
             <p className="mt-1 text-slate-500 flex  items-center gap-1">
-              <MdCheckCircle size={20} className="text-teal-500" />
+              <CheckCircle size={20} className="text-teal-500" />
               <span>Product added to cart</span>
             </p>
           )}

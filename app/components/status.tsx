@@ -1,8 +1,8 @@
-import { IconType } from "react-icons";
+import React from "react";
 
 interface StatusProps {
   text: string;
-  icon: IconType;
+  icon: React.ElementType;
   bg: string;
   color: string;
 }
