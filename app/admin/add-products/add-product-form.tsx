@@ -12,13 +12,6 @@ import { colors } from "@/utils/colors";
 import { useCallback, useEffect, useState } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import {
-  getDownloadURL,
-  getStorage,
-  ref,
-  uploadBytesResumable,
-} from "firebase/storage";
-import firebaseApp from "@/libs/firebase";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
@@ -100,6 +93,10 @@ const AddProductForm = () => {
     const handleImageUploads = async () => {
       toast("Creating product, please wait...");
       try {
+        // Dynamic import to avoid webpack issues
+        const { getStorage, ref, uploadBytesResumable, getDownloadURL } = await import("firebase/storage");
+        const firebaseApp = (await import("@/libs/firebase")).default;
+        
         for (const item of data.images) {
           if (item.image) {
             const fileName = new Date().getTime() + "-" + item.image.name;
