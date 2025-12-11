@@ -39,7 +39,7 @@ export async function PUT(request: Request) {
     }
 
     await db.collection("Settings").updateOne(
-      { _id: "settings" },
+      { _id: "settings" } as any,
       { $set: updateData },
       { upsert: true }
     );
