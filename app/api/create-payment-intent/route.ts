@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     const db = mongoClient.db("ecommerce-nextjs-app");
 
     // Fetch SPF from settings
-    const settings = await db.collection("Settings").findOne({ _id: "settings" });
+    const settings = await db.collection("Settings").findOne({ _id: "settings" } as any);
     const spf = (settings as any)?.spf || 100;
 
     // Pre-check stock availability for all items

@@ -5,7 +5,7 @@ import { getMongoDb } from "@/libs/mongodb";
 export async function GET() {
   try {
     const db = await getMongoDb();
-    const settings = await db.collection("Settings").findOne({ _id: "settings" });
+    const settings = await db.collection("Settings").findOne({ _id: "settings" } as any);
 
     if (!settings) {
       return NextResponse.json({
@@ -73,7 +73,7 @@ export async function PUT(request: Request) {
       { upsert: true }
     );
 
-    const settings = await db.collection("Settings").findOne({ _id: "settings" });
+    const settings = await db.collection("Settings").findOne({ _id: "settings" } as any);
 
     return NextResponse.json({
       id: settings?._id,

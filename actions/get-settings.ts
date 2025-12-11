@@ -3,7 +3,7 @@ import { getMongoDb } from "@/libs/mongodb";
 export default async function getSettings() {
   try {
     const db = await getMongoDb();
-    const settings = await db.collection("Settings").findOne({ _id: "settings" });
+    const settings = await db.collection("Settings").findOne({ _id: "settings" } as any);
 
     if (!settings) {
       return {
