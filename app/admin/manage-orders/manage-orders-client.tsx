@@ -25,7 +25,7 @@ import AlertDialog from "@/app/components/alert-dialog";
 import Button from "@/app/components/button";
 
 type ExtendedOrder = Order & {
-  user: User;
+  user: User | null;
 };
 
 interface ManageOrdersClientProps {
@@ -88,7 +88,7 @@ const ManageOrdersClient: React.FC<ManageOrdersClientProps> = ({ orders }) => {
     rows = orders.map((order) => {
       return {
         id: order.id,
-        customer: order.user.name,
+        customer: order.user?.name || order.guestName || "Guest",
         amount: formatPrice(order.amount),
         paymentStatus: order.paymentClaimed ? "complete" : "pending",
         paymentConfirmed: order.paymentConfirmed,
