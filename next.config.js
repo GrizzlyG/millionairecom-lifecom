@@ -16,26 +16,10 @@ const nextConfig = {
       },
     ],
   },
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // Completely ignore firebase/storage on client builds
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        'firebase/storage': false,
-        '@firebase/storage': false,
-      };
-      
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-        crypto: false,
-        undici: false,
-      };
-    }
-    return config;
+  experimental: {
+    serverComponentsExternalPackages: ['@firebase/storage', 'firebase-admin'],
   },
+  transpilePackages: ['firebase', '@firebase/storage'],
 };
 
 module.exports = nextConfig;
