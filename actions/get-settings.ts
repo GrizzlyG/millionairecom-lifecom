@@ -20,6 +20,7 @@ export default async function getSettings() {
         bannerColors: ["blue", "indigo"],
         nextDeliveryTime: null,
         whatsappNumber: null,
+        updatedAt: new Date(),
       };
     }
 
@@ -55,6 +56,7 @@ export default async function getSettings() {
       bannerColors: ["blue", "indigo"],
       nextDeliveryTime: null,
       whatsappNumber: null,
+      updatedAt: new Date(),
     };
   }
 }
