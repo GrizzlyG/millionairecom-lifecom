@@ -232,7 +232,7 @@ const MonitorClient: React.FC<MonitorClientProps> = ({ orders, settings }) => {
           </div>
         </form>
         <p className="text-slate-500 text-sm mt-3">
-          This fee will be added to customer's total at checkout
+          This fee will be added to customer&apos;s total at checkout
         </p>
       </div>
 
@@ -265,7 +265,7 @@ const MonitorClient: React.FC<MonitorClientProps> = ({ orders, settings }) => {
               className="w-full p-3 border-2 border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-lg"
             />
             <p className="text-slate-500 text-xs mt-2">
-              Select a time for today's delivery window
+              Select a time for today&apos;s delivery window
             </p>
           </div>
           <div className="w-full sm:w-auto">
@@ -347,7 +347,7 @@ const MonitorClient: React.FC<MonitorClientProps> = ({ orders, settings }) => {
           </div>
         </form>
         <p className="text-slate-500 text-sm mt-3">
-          This number will be used for the "Chat on WhatsApp" button in the footer
+          This number will be used for the &quot;Chat on WhatsApp&quot; button in the footer
         </p>
       </div>
 

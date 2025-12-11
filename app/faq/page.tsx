@@ -148,7 +148,7 @@ const FAQPage = () => {
               Still have questions?
             </h3>
             <p className="text-slate-600">
-              Can't find what you're looking for? Feel free to reach out to our
+              Can&apos;t find what you&apos;re looking for? Feel free to reach out to our
               customer service team.
             </p>
           </div>

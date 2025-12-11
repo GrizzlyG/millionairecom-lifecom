@@ -113,7 +113,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           <Info className="text-amber-600 text-xl flex-shrink-0 mt-0.5" />
           <div className="flex-1">
             <p className="text-sm text-amber-900 mb-3">
-              <strong>Guest Checkout:</strong> You'll need to check the app manually to know when your order is ready. 
+              <strong>Guest Checkout:</strong> You&apos;ll need to check the app manually to know when your order is ready. 
               Create an account to receive notifications!
             </p>
             <div className="flex gap-2">
