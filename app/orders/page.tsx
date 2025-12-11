@@ -25,17 +25,17 @@ const Orders = async () => {
   const serializedOrders = orders.map(order => ({
     ...order,
     id: order.id.toString(),
-    createDate: order.createDate.toISOString(),
-    createdAt: order.createdAt?.toISOString(),
-    updatedAt: order.updatedAt?.toISOString(),
-    cancelledAt: order.cancelledAt?.toISOString() || null,
+    createDate: (order as any).createDate?.toISOString() || new Date().toISOString(),
+    createdAt: (order as any).createdAt?.toISOString(),
+    updatedAt: (order as any).updatedAt?.toISOString(),
+    cancelledAt: (order as any).cancelledAt?.toISOString() || null,
     reimbursedAt: (order as any).reimbursedAt?.toISOString() || null,
     user: order.user ? {
       ...order.user,
-      id: order.user.id.toString(),
-      createdAt: order.user.createdAt.toISOString(),
-      updatedAt: order.user.updatedAt.toISOString(),
-      emailVerified: order.user.emailVerified?.toISOString() || null,
+      id: order.user.id?.toString(),
+      createdAt: (order.user as any).createdAt?.toISOString(),
+      updatedAt: (order.user as any).updatedAt?.toISOString(),
+      emailVerified: (order.user as any).emailVerified?.toISOString() || null,
     } : undefined,
   }));
 
