@@ -49,7 +49,7 @@ const DeliveryCountdown: React.FC<DeliveryCountdownProps> = ({ deliveryTime }) =
   }, [deliveryTime]);
 
   const getShortTime = () => {
-    if (timeLeft === "You can still place order") return "Order";
+    if (timeLeft === "You can still place order") return null; // Just show clock, no text
     // Extract just the time part (e.g., "5 minutes" from "5 minutes to next free delivery")
     return timeLeft.replace(" to next free delivery", "");
   };
@@ -69,8 +69,8 @@ const DeliveryCountdown: React.FC<DeliveryCountdownProps> = ({ deliveryTime }) =
         <Clock className="text-base sm:text-lg" />
         {/* Desktop: Full text */}
         <span className="hidden sm:inline">{timeLeft}</span>
-        {/* Mobile: Short time only */}
-        <span className="sm:hidden">{getShortTime()}</span>
+        {/* Mobile: Time only, or just clock if no time set */}
+        {getShortTime() && <span className="sm:hidden">{getShortTime()}</span>}
       </button>
 
       {/* Tooltip */}
