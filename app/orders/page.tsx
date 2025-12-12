@@ -22,22 +22,27 @@ const Orders = async () => {
   }
 
   // Serialize orders to plain objects
-  const serializedOrders = orders.map(order => ({
-    ...order,
-    id: order.id.toString(),
-    createDate: (order as any).createDate?.toISOString() || new Date().toISOString(),
-    createdAt: (order as any).createdAt?.toISOString(),
-    updatedAt: (order as any).updatedAt?.toISOString(),
-    cancelledAt: (order as any).cancelledAt?.toISOString() || null,
-    reimbursedAt: (order as any).reimbursedAt?.toISOString() || null,
-    user: order.user ? {
-      ...order.user,
-      id: order.user.id?.toString(),
-      createdAt: (order.user as any).createdAt?.toISOString(),
-      updatedAt: (order.user as any).updatedAt?.toISOString(),
-      emailVerified: (order.user as any).emailVerified?.toISOString() || null,
-    } : undefined,
-  }));
+  const serializedOrders = orders.map(order => {
+    const orderData = order as any;
+    return {
+      ...orderData,
+      _id: undefined, // Remove MongoDB _id
+      id: order.id.toString(),
+      createDate: orderData.createDate?.toISOString() || new Date().toISOString(),
+      createdAt: orderData.createdAt?.toISOString(),
+      updatedAt: orderData.updatedAt?.toISOString(),
+      cancelledAt: orderData.cancelledAt?.toISOString() || null,
+      reimbursedAt: orderData.reimbursedAt?.toISOString() || null,
+      user: order.user ? {
+        ...order.user,
+        _id: undefined, // Remove MongoDB _id
+        id: order.user.id?.toString(),
+        createdAt: (order.user as any).createdAt?.toISOString(),
+        updatedAt: (order.user as any).updatedAt?.toISOString(),
+        emailVerified: (order.user as any).emailVerified?.toISOString() || null,
+      } : undefined,
+    };
+  }) as any;
 
   return (
     <div className="pt-8 pb-8">
