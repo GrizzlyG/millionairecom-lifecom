@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import * as admin from "firebase-admin";
-import { getAdminStorage } from "@/libs/firebase-admin";
 
-// POST - Upload image to Firebase Storage
+// POST - Convert image to Base64 data URL (no external storage needed)
 export async function POST(request: NextRequest) {
   try {
     console.log("=== Upload route started ===");
@@ -21,63 +19,31 @@ export async function POST(request: NextRequest) {
 
     console.log("File received:", file.name, file.type, file.size);
 
-    // Convert File to Buffer
+    // Convert File to Base64 data URL
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    console.log("Buffer created, size:", buffer.length);
-
-    // Upload to Firebase Storage using Admin SDK
-    const fileName = `${Date.now()}-${file.name}`;
-    console.log("Getting storage instance...");
+    const base64 = buffer.toString('base64');
+    const dataUrl = `data:${file.type};base64,${base64}`;
     
-    const storage = getAdminStorage();
-    console.log("Storage instance obtained");
-    
-    const bucket = storage.bucket();
-    console.log("Bucket name:", bucket.name);
-    console.log("Uploading file:", fileName);
-    
-    const fileRef = bucket.file(`products/${fileName}`);
-    
-    // Upload file
-    console.log("Starting file upload...");
-    await fileRef.save(buffer, {
-      contentType: file.type,
-      metadata: {
-        firebaseStorageDownloadTokens: crypto.randomUUID(),
-      },
-    });
-    console.log("File uploaded successfully");
-
-    // Make file publicly accessible
-    console.log("Making file public...");
-    await fileRef.makePublic();
-    console.log("File made public");
-
-    // Get download URL
-    const downloadURL = `https://storage.googleapis.com/${bucket.name}/${fileRef.name}`;
-    
-    console.log("Upload successful:", downloadURL);
+    console.log("Image converted to Base64, size:", dataUrl.length);
 
     return NextResponse.json({
-      url: downloadURL,
+      url: dataUrl,
       color: color || "",
     });
   } catch (error: any) {
     console.error("=== Upload error ===");
     console.error("Error message:", error.message);
-    console.error("Error code:", error.code);
     console.error("Error stack:", error.stack);
-    console.error("Full error:", JSON.stringify(error, null, 2));
     
     return NextResponse.json(
-      { error: error.message || "Upload failed", details: error.code },
+      { error: error.message || "Upload failed" },
       { status: 500 }
     );
   }
 }
 
-// DELETE - Delete image from Firebase Storage
+// DELETE - No-op for Base64 images (no external storage to delete from)
 export async function DELETE(request: NextRequest) {
   try {
     const { url } = await request.json();
@@ -89,25 +55,13 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Extract file path from URL
-    const bucket = getAdminStorage().bucket();
-    const urlParts = url.split(`${bucket.name}/`);
-    const filePath = urlParts[1];
-
-    if (!filePath) {
-      return NextResponse.json(
-        { error: "Invalid URL format" },
-        { status: 400 }
-      );
-    }
-
-    // Delete file
-    const fileRef = bucket.file(filePath);
-    await fileRef.delete();
+    // Base64 images are stored in the database, nothing to delete here
+    // The image will be removed when the product is deleted
+    console.log("DELETE called for Base64 image (no-op)");
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error("Error deleting file:", error);
+    console.error("Error in delete endpoint:", error);
     return NextResponse.json(
       { error: error.message || "Delete failed" },
       { status: 500 }
