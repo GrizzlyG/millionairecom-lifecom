@@ -13,8 +13,8 @@ import getSettings from "@/actions/get-settings";
 const outfit = Outfit({ subsets: ["latin"], weight: ["400", "500", "600"] });
 
 export const metadata: Metadata = {
-  title: "WindowShop",
-  description: "WindowShop Portfolio App",
+  title: "WindowChop",
+  description: "WindowChop - The Easiest Shop On Campus",
 };
 
 export default async function RootLayout({

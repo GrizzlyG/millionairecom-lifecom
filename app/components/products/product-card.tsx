@@ -106,35 +106,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ data }) => {
           </div>
         )}
 
-        {data.list !== data.price && (
-          <div className="flex flex-wrap justify-center font-normal text-sm text-slate-400 gap-2 mb-1">
-            <span className="line-through">{formatPrice(data.list + (data.dmc || 0))}</span>
-            <Status
-              text={
-                Math.round(((data.price - data.list) / data.price) * 100) +
-                "% OFF"
-              }
-              icon={Check}
-              bg="bg-pink-600"
-              color="text-white font-medium"
-            />
-          </div>
-        )}
 
         {/* Price */}
-        <div
-          className={`flex items-center gap-1 ${
-            data.list === data.price && "mt-3"
-          }`}
-        >
+        <div className="flex items-center gap-1 mt-3">
           <div className="font-semibold text-[1.3rem]">
             {formatPrice(data.price + (data.dmc || 0))}
           </div>
         </div>
 
-        <div className={`${data.list === data.price && "mt-3"}`}>
-          free delivery
-        </div>
+        <div className="mt-3">free delivery</div>
 
         {/* Stock Status */}
         <div className="mt-3 mb-2 flex gap-2 items-center justify-center">

@@ -19,7 +19,6 @@ export async function POST(request: Request) {
     category,
     inStock,
     images,
-    list,
     stock,
     isVisible,
   } = body;
@@ -43,7 +42,6 @@ export async function POST(request: Request) {
         images,
         price: parseFloat(price),
         dmc: dmcValue,
-        list: parseFloat(list),
       },
     });
 

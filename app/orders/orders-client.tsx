@@ -268,6 +268,11 @@ const OrdersClient: React.FC<OrdersClient> = ({ orders }) => {
                           {order.deliveryStatus.charAt(0).toUpperCase() + order.deliveryStatus.slice(1)}
                         </div>
                       )}
+                      {(order as any).userConfirmedDelivery && (
+                        <div className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-100 text-blue-700 border border-blue-300">
+                          ✓ Received
+                        </div>
+                      )}
                     </div>
 
                     {/* User Delivery Confirmation Button */}
@@ -277,12 +282,16 @@ const OrdersClient: React.FC<OrdersClient> = ({ orders }) => {
                           onClick={() => handleDeliveryConfirmation(order.id, !(order as any).userConfirmedDelivery)}
                           disabled={loading}
                           className={`w-full md:w-auto px-4 py-2 rounded-lg text-sm font-semibold transition active:scale-95 ${
-                            (order as any).userConfirmedDelivery
+                            !(order as any).userConfirmedDelivery
                               ? "bg-green-100 text-green-700 border border-green-300 hover:bg-green-200"
                               : "bg-amber-100 text-amber-700 border border-amber-300 hover:bg-amber-200"
                           } disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
-                          {loading ? "..." : (order as any).userConfirmedDelivery ? "✓ I Have Received" : "I Have Not Received"}
+                          {loading
+                            ? "..."
+                            : !(order as any).userConfirmedDelivery
+                              ? "✓ I Have Received"
+                              : "I Have Not Received"}
                         </button>
                       </div>
                     )}

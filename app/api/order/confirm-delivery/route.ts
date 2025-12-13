@@ -35,7 +35,7 @@ export async function PUT(request: Request) {
       );
     }
 
-    // Update user confirmation status
+    // Only allow user to set userConfirmedDelivery if not delivered
     const updatedOrder = await prisma.order.update({
       where: { id: orderId },
       data: {

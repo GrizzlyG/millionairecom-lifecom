@@ -5,7 +5,7 @@ export default async function getOrdersByUserId(userId: string) {
   
   try {
     await mongoClient.connect();
-    const db = mongoClient.db("ecommerce-nextjs-app");
+    const db = mongoClient.db("windowshopdb");
     
     // Get orders for this user - userId is stored as ObjectId string
     const orders = await db

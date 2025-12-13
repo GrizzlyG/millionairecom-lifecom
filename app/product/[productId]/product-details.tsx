@@ -15,6 +15,7 @@ import { formatPrice } from "@/utils/format-price";
 import Status from "@/app/components/status";
 interface ProductDetailsProps {
   product: any;
+  spf: number;
 }
 
 export type CartProductType = {
@@ -41,7 +42,7 @@ const Horizontal = () => {
   return <hr className="w-[30%] my-2" />;
 };
 
-const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
+const ProductDetails: React.FC<ProductDetailsProps> = ({ product, spf }) => {
   console.log("Product in client component:", { id: product.id, name: product.name, price: product.price, dmc: product.dmc });
   
   const { cartProducts, handleAddProductToCart } = useCart();
@@ -190,9 +191,15 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
             </div>
           )}
           <div className="flex gap-4 text-3xl text-slate-600 font-bold">
+            <span>Price</span>
+            <div>
+              {formatPrice(product.price + (product.dmc || 0))}
+            </div>
+          </div>
+          <div className="flex gap-4 text-2xl text-slate-700 font-bold mt-2">
             <span>Total</span>
             <div>
-              {formatPrice((product.price + (product.dmc || 0)) * cartProduct.quantity)}
+              {formatPrice((product.price + (product.dmc || 0) + (spf || 0)) * cartProduct.quantity)}
             </div>
           </div>
           <Horizontal />

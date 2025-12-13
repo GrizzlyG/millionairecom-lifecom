@@ -46,7 +46,6 @@ export async function PUT(
     category,
     inStock,
     images,
-    list,
     stock,
     remainingStock,
     isVisible,
@@ -71,7 +70,6 @@ export async function PUT(
     category,
     images,
     price: parseFloat(price),
-    list: parseFloat(list),
   };
 
   if (dmcValue !== undefined) updateData.dmc = dmcValue;

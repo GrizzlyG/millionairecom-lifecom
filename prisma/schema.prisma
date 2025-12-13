@@ -49,7 +49,7 @@ model Product {
   description       String
   price             Float
   dmc               Float   @default(0)
-  list              Float
+  // 'list' property removed
   brand             String
   category          String
   inStock           Boolean
@@ -94,6 +94,9 @@ model Order {
   paymentIntentId   String    @unique
   products          CartProductType[]
   address           Address?
+
+  userConfirmedDelivery   Boolean   @default(false)
+  userConfirmedDeliveryAt DateTime?
 
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

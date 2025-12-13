@@ -44,7 +44,7 @@ const NavBar: React.FC<NavBarPros> = ({ currentUser, nextDeliveryTime }) => {
                 <ChevronLeft className="text-[1rem] sm:text-[1.25rem] mb-1 sm:mb-[1.75px]" />
               )}
               <span className="text-emerald-400">Window</span>
-              <span className="text-slate-200 ml-1">Shop</span>
+              <span className="text-slate-200 ml-1">Chop</span>
               <span className="text-emerald-400">.</span>
               <span className="absolute -top-1 -right-8 sm:-right-12 bg-emerald-500 text-white text-[0.6rem] sm:text-xs font-semibold px-1.5 sm:px-2 py-0.5 rounded-full">
                 Store

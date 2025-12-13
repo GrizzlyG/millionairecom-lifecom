@@ -44,7 +44,6 @@ const EditProductForm = ({ product }: { product: Product }) => {
     setCustomValue("isVisible", (product as any).isVisible ?? true);
     setCustomValue("price", product.price);
     setCustomValue("dmc", (product as any).dmc || 0);
-    setCustomValue("list", product.list);
     setOldImages(product.images);
   }, []);
 
@@ -66,7 +65,6 @@ const EditProductForm = ({ product }: { product: Product }) => {
       images: [],
       price: "",
       dmc: "",
-      list: "",
     },
   });
 
@@ -139,7 +137,6 @@ const EditProductForm = ({ product }: { product: Product }) => {
       }
     }
 
-    const list = data.list === "" || data.list === 0 ? data.price : data.list;
     const dmc = data.dmc === "" || data.dmc === 0 ? 0 : Number(data.dmc);
 
     const mergedImages = [...product.images, ...uploadedImages];
@@ -147,7 +144,6 @@ const EditProductForm = ({ product }: { product: Product }) => {
     const productData = {
       ...data,
       images: mergedImages,
-      list: list,
       dmc: dmc,
       stock: data.stock !== undefined ? Number(data.stock) : undefined,
       remainingStock:
@@ -220,14 +216,6 @@ const EditProductForm = ({ product }: { product: Product }) => {
         <Input
           id="dmc"
           label="DMC"
-          disabled={isLoading}
-          register={register}
-          errors={errors}
-          type="number"
-        />
-        <Input
-          id="list"
-          label="List"
           disabled={isLoading}
           register={register}
           errors={errors}

@@ -52,7 +52,6 @@ const AddProductForm = () => {
       images: [],
       price: "",
       dmc: "",
-      list: "",
     },
   });
 
@@ -131,13 +130,12 @@ const AddProductForm = () => {
       return; // Stop if upload failed
     }
 
-    const list = data.list === "" || data.list === 0 ? data.price : data.list;
     const dmc = data.dmc === "" || data.dmc === 0 ? 0 : Number(data.dmc);
 
+    const { list, ...rest } = data;
     const productData = {
-      ...data,
+      ...rest,
       images: uploadedImages,
-      list: list,
       dmc: dmc,
       stock: data.stock ? Number(data.stock) : 0,
     };
@@ -238,14 +236,6 @@ const AddProductForm = () => {
           <Input
             id="dmc"
             label="DMC (₦)"
-            disabled={isLoading}
-            register={register}
-            errors={errors}
-            type="number"
-          />
-          <Input
-            id="list"
-            label="List Price (₦)"
             disabled={isLoading}
             register={register}
             errors={errors}
