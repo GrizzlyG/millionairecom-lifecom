@@ -101,8 +101,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ data }) => {
 
         {/* Product Description */}
         {data.description && (
-          <div className="text-xs text-slate-500 mb-1 line-clamp-2 min-h-[2.5em]">
-            {truncateText(data.description, 100)}
+          <div className="text-xs text-slate-500 mb-1 line-clamp-3 min-h-[3.8em]">
+            {truncateText(data.description, 180)}
           </div>
         )}
 

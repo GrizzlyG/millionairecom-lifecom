@@ -56,7 +56,9 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
       });
   }, []);
  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -146,6 +148,12 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
       )}
 
       <div className="space-y-6">
+        {!bankDetails && (
+          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-300 rounded text-yellow-800 text-sm flex items-center gap-2">
+            <svg className="animate-spin h-5 w-5 text-yellow-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+            Please wait for bank details and list of hostels to load before completing checkout.
+          </div>
+        )}
         {/* Delivery Information */}
         <div>
           <h2 className="font-semibold mb-4">Delivery Information</h2>
@@ -202,14 +210,17 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
               <label className="block text-sm font-medium mb-2">
                 Additional Address (Optional)
               </label>
-              <input
-                type="text"
+              <textarea
                 name="address"
                 value={formData.address}
                 onChange={handleInputChange}
-                placeholder="Room number, landmarks, etc."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Room number, landmarks, or a lovely message if buying for someone else."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[70px] resize-vertical"
+                rows={3}
               />
+              <p className="text-xs text-gray-500 mt-1">
+                You can write a message here if you are buying for someone else (e.g. recipient&apos;s name, phone, or instructions). We’ll help deliver it as a nice hand-written note with their order!
+              </p>
             </div>
           </div>
         </div>
@@ -264,7 +275,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
       <Button
         label={isLoading ? "Processing..." : "Confirm Order"}
         isLoading={isLoading}
-        disabled={isLoading}
+        disabled={isLoading || !bankDetails}
         type="submit"
       />
 

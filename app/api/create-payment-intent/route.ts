@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   try {
     const currentUser = await getCurrentUser();
     const body = await request.json();
-    const { items, guestEmail, guestName } = body;
+    const { items, guestEmail, guestName, address } = body;
 
     if (!items || items.length === 0) {
       return NextResponse.json(
@@ -116,6 +116,7 @@ export async function POST(request: Request) {
       paymentConfirmed: false,
       paymentClaimed: false,
       products: filteredProducts,
+      address: address || null,
       createDate: now,
       createdAt: now,
       updatedAt: now,

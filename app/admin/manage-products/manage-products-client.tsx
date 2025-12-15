@@ -150,7 +150,7 @@ const ManageProductsClient: React.FC<ManageProductsClientProps> = ({
       .catch((error) => {
         console.log(error);
       });
-  }, []);
+  }, [router]);
 
   const columns: GridColDef[] = [
     { 

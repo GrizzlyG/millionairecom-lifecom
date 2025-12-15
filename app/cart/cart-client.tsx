@@ -16,7 +16,7 @@ interface CartClientProps {
 }
 
 const CartClient: React.FC<CartClientProps> = ({ currentUser }) => {
-  const { cartProducts, cartTotalAmount, handleClearCart } = useCart();
+  const { cartProducts, cartSubtotal, handleClearCart } = useCart();
   const router = useRouter();
 
   if (!cartProducts || cartProducts.length === 0) {
@@ -71,11 +71,11 @@ const CartClient: React.FC<CartClientProps> = ({ currentUser }) => {
         <div className="text-sm flex flex-col gap-1 items-start">
           <div className="flex justify-between w-full text-base font-semibold">
             <span>Subtotal</span>
-            <span>{formatPrice(cartTotalAmount)}</span>
+            <span>{formatPrice(cartSubtotal)}</span>
           </div>
           <p></p>
           <p className="text-slate-500">
-            Taxes and shipping calculated at checkout
+            Total cost calculated at checkout
           </p>
           <Button
             label="Checkout"

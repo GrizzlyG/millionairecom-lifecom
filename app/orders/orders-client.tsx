@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import ActionButton from "@/app/components/action-button";
 import { useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -72,7 +73,7 @@ const OrdersClient: React.FC<OrdersClient> = ({ orders }) => {
         toast.error("Oops! Something went wrong.");
         console.log(error);
       });
-  }, []);
+  }, [handleRemovePaymentIntent, router]);
 
   const handleHideOrder = (orderId: string) => {
     setHiddenOrders(prev => {
@@ -230,10 +231,13 @@ const OrdersClient: React.FC<OrdersClient> = ({ orders }) => {
                       <div className="space-y-2">
                         {(order.products as any[])?.map((item, index) => (
                           <div key={index} className="flex items-center gap-3 bg-slate-50 rounded-lg p-2">
-                            <img
+                            <Image
                               src={item.selectedImg?.image || "/placeholder.png"}
                               alt={item.name}
+                              width={48}
+                              height={48}
                               className="w-12 h-12 object-cover rounded"
+                              unoptimized={item.selectedImg?.image?.startsWith("http") ? false : true}
                             />
                             <div className="flex-1 min-w-0">
                               <p className="font-semibold text-sm text-slate-800 truncate">
