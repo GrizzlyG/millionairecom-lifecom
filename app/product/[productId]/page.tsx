@@ -1,5 +1,4 @@
 import Container from "@/app/components/container";
-import Head from "next/head";
 import ProductDetails from "./product-details";
 import getSettings from "@/actions/get-settings";
 import ListRating from "./list-rating";
@@ -7,6 +6,32 @@ import getProductById from "@/actions/get-product-by-id";
 import NullData from "@/app/components/null-data";
 import AddRating from "./add-rating";
 import getCurrentUser from "@/actions/get-current-user";
+import type { Metadata } from "next";
+export async function generateMetadata({ params }: { params: ItemParams }): Promise<Metadata> {
+  const product = await getProductById(params);
+  if (!product) {
+    return {
+      title: "Product Not Found",
+      description: "This product does not exist.",
+      openGraph: {
+        title: "Product Not Found",
+        description: "This product does not exist.",
+        url: `${process.env.NEXT_PUBLIC_BASE_URL || ''}/product/${params.productId}`,
+      },
+    };
+  }
+  const productImage = product.images && product.images.length > 0 ? product.images[0].image : '';
+  return {
+    title: product.name,
+    description: product.description,
+    openGraph: {
+      title: product.name,
+      description: product.description,
+      images: productImage ? [productImage] : [],
+      url: `${process.env.NEXT_PUBLIC_BASE_URL || ''}/product/${product.id}`,
+    },
+  };
+}
 
 interface ItemParams {
   productId: string;
@@ -35,32 +60,20 @@ const Product = async ({ params }: { params: ItemParams }) => {
     }))
   };
 
-  const productUrl = `${process.env.NEXT_PUBLIC_BASE_URL || ''}/product/${product.id}`;
-  const productImage = product.images && product.images.length > 0 ? product.images[0].image : '';
-
   return (
-    <>
-      <Head>
-        <title>{product.name}</title>
-        <meta property="og:title" content={product.name} />
-        <meta property="og:description" content={product.description} />
-        <meta property="og:image" content={productImage} />
-        <meta property="og:url" content={productUrl} />
-      </Head>
-      <div className="p-8">
-        <Container>
-          <ProductDetails product={serializedProduct} spf={settings.spf} />
-          <div className="flex flex-col-reverse sm:flex-row mt-12 sm:mt-20 gap-4">
-            <div className="w-full sm:w-1/2">
-              <AddRating product={serializedProduct} user={user as any} />
-            </div>
-            <div className="sm:w-1/2">
-              <ListRating product={serializedProduct} />
-            </div>
+    <div className="p-8">
+      <Container>
+        <ProductDetails product={serializedProduct} spf={settings.spf} />
+        <div className="flex flex-col-reverse sm:flex-row mt-12 sm:mt-20 gap-4">
+          <div className="w-full sm:w-1/2">
+            <AddRating product={serializedProduct} user={user as any} />
           </div>
-        </Container>
-      </div>
-    </>
+          <div className="sm:w-1/2">
+            <ListRating product={serializedProduct} />
+          </div>
+        </div>
+      </Container>
+    </div>
   );
 };
 
