@@ -33,19 +33,14 @@ export async function POST(request: Request) {
     await mongoClient.connect();
     const db = mongoClient.db("windowshopdb");
 
-    // Calculate per-order SPF as sum of (product SPF × quantity) for all products ONLY (do not add DMC)
-    let perOrderSpf = 0;
+    // Calculate per-order SPF: use settings.spf or fallback default (e.g. 100)
+    let perOrderSpf = 100;
     let totalDmc = 0;
+    const settings = await db.collection("Settings").findOne({});
+    if (settings && settings.spf !== undefined) {
+      perOrderSpf = settings.spf;
+    }
     for (const item of items) {
-      let productObjectId;
-      try {
-        productObjectId = new ObjectId(item.id);
-      } catch (err) {
-        continue;
-      }
-      const product = await db.collection("Product").findOne({ _id: productObjectId });
-      const productSpf = (product && product.spf !== undefined) ? product.spf : 75; // fallback default
-      perOrderSpf += productSpf * (item.quantity || 1);
       totalDmc += (item.dmc || 0) * (item.quantity || 1);
     }
 

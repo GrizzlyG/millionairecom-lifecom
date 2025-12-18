@@ -40,9 +40,9 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
     hostel: "",
   });
 
-  // Add DMC to SPF silently
-  const spfWithDmc = spf + cartTotalDmc;
-  const totalWithSpf = cartSubtotal + spfWithDmc;
+  // Sorting & Packaging Fee = SPF + total DMC
+  const sortingPackagingFee = spf + cartTotalDmc;
+  const totalWithSpf = cartSubtotal + sortingPackagingFee;
   const formattedPrice = formatPrice(totalWithSpf);
 
   // Fetch bank details on mount
@@ -259,7 +259,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
         </div>
         <div className="flex justify-between text-slate-600 mb-2">
           <span>Sorting & Packaging Fee:</span>
-          <span>{formatPrice(spfWithDmc)}</span>
+          <span>{formatPrice(sortingPackagingFee)}</span>
         </div>
         <div className="flex justify-between text-slate-600 mb-2">
           <span>Delivery Fee:</span>

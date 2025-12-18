@@ -1,8 +1,8 @@
 import AdminNav from "../components/admin/admin-nav";
 
 export const metadata = {
-  title: "WindowShop Admin",
-  description: "WindowShop Admin Dashboard",
+  title: "EasyByFar Admin",
+  description: "EasyByFar Admin Dashboard",
 };
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {

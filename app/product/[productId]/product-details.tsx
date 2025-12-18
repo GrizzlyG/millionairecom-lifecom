@@ -15,10 +15,10 @@ import { formatPrice } from "@/utils/format-price";
 import Status from "@/app/components/status";
 interface ProductDetailsProps {
   product: any;
-  spf: number;
 }
 
-export type CartProductType = {
+
+export interface CartProductType {
   id: string;
   name: string;
   description: string;
@@ -29,7 +29,7 @@ export type CartProductType = {
   price: number;
   dmc: number;
   remainingStock?: number;
-};
+}
 
 
 export type SelectedImgType = {
@@ -42,7 +42,7 @@ const Horizontal = () => {
   return <hr className="w-[30%] my-2" />;
 };
 
-const ProductDetails: React.FC<ProductDetailsProps> = ({ product, spf }) => {
+const ProductDetails: React.FC<ProductDetailsProps> = ({ product }) => {
   
   const { cartProducts, handleAddProductToCart } = useCart();
   const [isProductInCart, setIsProductInCart] = useState<boolean>(false);
