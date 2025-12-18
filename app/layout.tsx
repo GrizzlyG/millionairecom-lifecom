@@ -5,6 +5,7 @@ import NavBar from "./components/nav/nav-bar";
 import Footer from "./components/footer/footer";
 import CartProvider from "@/provider/cart-provider";
 import { Toaster } from "react-hot-toast";
+import { Analytics } from "@vercel/analytics/next";
 // import getCurrentUser from "@/actions/get-current-user";
 // import CustomerNotifications from "./components/customer/customer-notifications";
 // import TopLoader from "./components/top-loader";
@@ -50,6 +51,7 @@ export default function RootLayout({
           <main className="flex-grow">{children}</main>
           <Footer /* whatsappNumber={(settings as any)?.whatsappNumber} */ />
         </CartProvider>
+        <Analytics />
       </body>
     </html>
   );

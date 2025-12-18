@@ -23,9 +23,8 @@ export default function PrivacyPolicy() {
         <h2 className="text-xl font-semibold mt-6 mb-2">2. How We Use Your Information</h2>
         <ul className="list-disc pl-6 mb-4">
           <li>To provide, operate, and maintain our services.</li>
-          <li>To process orders and payments.</li>
-          <li>To communicate with you, including order updates and marketing (with your consent).</li>
-          <li>To improve our website, services, and user experience.</li>
+          <li>To improve our user experience.</li>
+          <li>We collect your email address solely for authentication and account security. We do not use your email to send marketing or service communications.</li>
           <li>To comply with legal obligations and protect our rights.</li>
         </ul>
         <h2 className="text-xl font-semibold mt-6 mb-2">3. Sharing Your Information</h2>
@@ -58,7 +57,7 @@ export default function PrivacyPolicy() {
         </p>
         <h2 className="text-xl font-semibold mt-6 mb-2">9. Contact Us</h2>
         <p>
-          If you have any questions or concerns about this Privacy Policy or your personal information, please contact us at <a href="mailto:support@easybyfar.com" className="text-blue-600 underline">support@easybyfar.com</a>.
+          If you have any questions or concerns about this Privacy Policy or your personal information, please contact us at <a href="mailto:m4a.thenics@gmail.com" className="text-blue-600 underline">m4a.thenics@gmail.com</a>.
         </p>
       </Container>
     </div>
