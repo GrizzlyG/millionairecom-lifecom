@@ -154,7 +154,7 @@ const MonitorClient: React.FC<MonitorClientProps> = ({ orders, settings }) => {
     const selectedTime = new Date();
     selectedTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
-    // Validate time range (10 minutes to 4 hours from now)
+    // Validate time range (10 minutes to 7 days from now)
     const now = new Date();
     const diffMinutes = (selectedTime.getTime() - now.getTime()) / (1000 * 60);
 
@@ -163,8 +163,8 @@ const MonitorClient: React.FC<MonitorClientProps> = ({ orders, settings }) => {
       return;
     }
 
-    if (diffMinutes > 240) { // 4 hours = 240 minutes
-      toast.error("Delivery time cannot be more than 4 hours from now");
+    if (diffMinutes > 10080) { // 7 days = 10080 minutes
+      toast.error("Delivery time cannot be more than 7 days from now");
       return;
     }
 
@@ -265,7 +265,7 @@ const MonitorClient: React.FC<MonitorClientProps> = ({ orders, settings }) => {
         <form onSubmit={deliveryForm.handleSubmit(onSubmitDeliveryTime)} className="flex flex-col gap-4">
           <div className="flex-1 w-full">
             <label className="font-medium text-sm text-slate-700 mb-2 block">
-              Set Delivery Time (10 min - 4 hours from now)
+              Set Delivery Time (10 min - 7 days from now)
             </label>
             <input
               id="deliveryTime"
@@ -275,7 +275,7 @@ const MonitorClient: React.FC<MonitorClientProps> = ({ orders, settings }) => {
               className="w-full p-3 border-2 border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 disabled:opacity-50 disabled:cursor-not-allowed text-lg"
             />
             <p className="text-slate-500 text-xs mt-2">
-              Select a time for today&apos;s delivery window
+              Select a time for today or up to 7 days ahead
             </p>
           </div>
           <div className="w-full sm:w-auto">
