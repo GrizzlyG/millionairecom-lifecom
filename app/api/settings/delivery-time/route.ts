@@ -18,6 +18,14 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Delivery time is required" }, { status: 400 });
   }
 
+  // Ensure seconds for ISO string (datetime-local input has no seconds)
+  const localTimeWithSeconds = nextDeliveryTime.length === 16 ? nextDeliveryTime + ':00' : nextDeliveryTime;
+  // Parse as local time (standard JS Date parsing)
+  const parsedDate = new Date(localTimeWithSeconds);
+  if (isNaN(parsedDate.getTime())) {
+    return NextResponse.json({ error: "Invalid delivery time format" }, { status: 400 });
+  }
+
   const mongoClient = new MongoClient(MONGO_URI);
   await mongoClient.connect();
   const db = mongoClient.db("windowshopdb");
@@ -27,7 +35,7 @@ export async function PUT(request: Request) {
       { _id: "settings" } as any,
       { 
         $set: { 
-          nextDeliveryTime: new Date(nextDeliveryTime),
+          nextDeliveryTime: parsedDate,
           updatedAt: new Date()
         } 
       },

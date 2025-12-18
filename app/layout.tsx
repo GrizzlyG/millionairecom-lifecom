@@ -18,12 +18,14 @@ export const metadata: Metadata = {
   description: "No More Queueing to Buy Stuff!",
 };
 
-export default function RootLayout({
+import getSettings from "@/actions/get-settings";
+
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // TODO: Move user/settings fetching into pages or context providers as needed
+  const settings = await getSettings();
   return (
     <html lang="en">
       <body
@@ -47,7 +49,7 @@ export default function RootLayout({
           {/* {currentUser && currentUser.role !== "ADMIN" && (
             <CustomerNotifications userId={currentUser.id} />
           )} */}
-          <NavBar /* currentUser={currentUser} nextDeliveryTime={settings?.nextDeliveryTime?.toISOString() || null} */ />
+          <NavBar nextDeliveryTime={settings?.nextDeliveryTime ? settings.nextDeliveryTime.toISOString() : null} />
           <main className="flex-grow">{children}</main>
           <Footer /* whatsappNumber={(settings as any)?.whatsappNumber} */ />
         </CartProvider>

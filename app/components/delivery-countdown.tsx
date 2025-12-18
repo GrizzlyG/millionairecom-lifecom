@@ -32,13 +32,20 @@ const DeliveryCountdown: React.FC<DeliveryCountdownProps> = ({ deliveryTime }) =
 
       setIsExpired(false);
 
-      const totalMinutes = Math.floor(difference / (1000 * 60));
-      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+      const totalSeconds = Math.floor(difference / 1000);
+      const totalMinutes = Math.floor(totalSeconds / 60);
+      const totalHours = Math.floor(totalMinutes / 60);
+      const totalDays = Math.floor(totalHours / 24);
 
-      if (totalMinutes > 0) {
-        setTimeLeft(`${totalMinutes} minutes to next free delivery`);
+      if (totalDays > 0) {
+        setTimeLeft(`${totalDays} day${totalDays > 1 ? "s" : ""} to next free delivery`);
+      } else if (totalHours > 0) {
+        setTimeLeft(`${totalHours} hour${totalHours > 1 ? "s" : ""} to next free delivery`);
+      } else if (totalMinutes > 0) {
+        setTimeLeft(`${totalMinutes} minute${totalMinutes > 1 ? "s" : ""} to next free delivery`);
       } else {
-        setTimeLeft(`${seconds} seconds to next free delivery`);
+        const seconds = totalSeconds % 60;
+        setTimeLeft(`${seconds} second${seconds !== 1 ? "s" : ""} to next free delivery`);
       }
     };
 

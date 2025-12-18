@@ -23,6 +23,20 @@
 				"$tsc"
 			],
 			"group": "build"
+		},
+		{
+			"label": "Build Next.js App",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"build"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
 		}
 	]
 }

@@ -1,4 +1,4 @@
-"use client";
+// Removed 'use client' to allow async/await in Server Component
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 

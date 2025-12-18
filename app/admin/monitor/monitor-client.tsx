@@ -184,8 +184,10 @@ const MonitorClient: React.FC<MonitorClientProps> = ({ orders, settings }) => {
       return;
     }
 
-    // Parse the datetime-local string (YYYY-MM-DDTHH:mm)
-    const selectedTime = new Date(data.deliveryTime);
+    // Use the raw value from the input (local time string)
+    const localTimeString = data.deliveryTime;
+    // Parse as local time for validation
+    const selectedTime = new Date(localTimeString);
 
     // Validate time range (10 minutes to 7 days from now)
     const now = new Date();
@@ -204,7 +206,7 @@ const MonitorClient: React.FC<MonitorClientProps> = ({ orders, settings }) => {
     setIsUpdatingDeliveryTime(true);
     try {
       await axios.put("/api/settings/delivery-time", {
-        nextDeliveryTime: selectedTime.toISOString(),
+        nextDeliveryTime: localTimeString, // send as local time string
       });
       toast.success("Next delivery time set successfully");
       router.refresh();
