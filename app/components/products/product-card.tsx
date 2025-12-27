@@ -22,6 +22,7 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ data }) => {
   const { handleAddProductToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
+  const [showImage, setShowImage] = useState(false);
 
   const remaining = data.remainingStock ?? data.stock ?? 0;
 
@@ -70,25 +71,32 @@ const ProductCard: React.FC<ProductCardProps> = ({ data }) => {
 
   return (
     <div className="col-span-1 bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow flex flex-col h-full">
-      {/* Product Image - Full width at top */}
-      <Link href={`/product/${data.id}`}>
-        <div className="aspect-square overflow-hidden relative w-full cursor-pointer hover:opacity-90 transition bg-gray-50">
-          {data.images && data.images.length > 0 ? (
+      {/* Product Image - Lazy load with button */}
+      <div className="aspect-square overflow-hidden relative w-full bg-gray-50 flex items-center justify-center">
+        {!showImage ? (
+          <button
+            className="px-3 py-2 bg-blue-500 text-white rounded shadow hover:bg-blue-600 transition"
+            onClick={() => setShowImage(true)}
+          >
+            Show Image
+          </button>
+        ) : (
+          data.images && data.images.length > 0 ? (
             <Image
               src={data.images[0].image}
               alt={data.name}
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="w-full h-full object-cover"
-              loading="lazy"
+              loading="eager"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500">
               No Image
             </div>
-          )}
-        </div>
-      </Link>
+          )
+        )}
+      </div>
 
       {/* Product Info */}
       <div className="flex flex-col items-center w-full gap-1 flex-1 p-3 text-center">
