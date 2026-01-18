@@ -28,6 +28,9 @@ yarn-error.log*
 .env
 .env*.local
 
+# ignore old MongoDB data
+data/db/
+
 # vercel
 .vercel
 
