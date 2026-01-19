@@ -7,15 +7,27 @@ import getUsers from "@/actions/get-users";
 import getOrders from "@/actions/get-orders";
 import NullData from "@/app/components/null-data";
 import getCurrentUser from "@/actions/get-current-user";
+import { enforceManagerPageAccess } from "@/middleware/enforceManagerPageAccess";
 
 const ManageUsers = async () => {
+
+  // Enforce manager page access (key: "users")
+  const redirect = await enforceManagerPageAccess("users");
+  if (redirect) return redirect;
+
   const currentUser = await getCurrentUser();
 
-  if (!currentUser || currentUser.role !== "ADMIN") {
-    return <NullData title="Oops! Access denied" />;
-  }
-
-  const users = await getUsers();
+  const usersRaw = await getUsers();
+  // Serialize all Date fields in users
+  const users = (usersRaw || []).map((user: any) => ({
+    ...user,
+    createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt,
+    updatedAt: user.updatedAt instanceof Date ? user.updatedAt.toISOString() : user.updatedAt,
+    emailVerified:
+      user.emailVerified instanceof Date || typeof user.emailVerified === 'object'
+        ? user.emailVerified?.toISOString?.() ?? null
+        : user.emailVerified ?? null,
+  }));
   const orders = await getOrders();
 
   return (

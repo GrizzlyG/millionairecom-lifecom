@@ -1,6 +1,5 @@
 "use client";
 
-import { Order, User } from "@prisma/client";
 import Heading from "@/app/components/heading";
 import { User as UserIcon, Mail, Calendar, ShoppingCart, CheckCircle, XCircle } from "lucide-react";
 import moment from "moment";
@@ -9,10 +8,39 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
+
+interface User {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  role: string;
+  accessiblePages?: string[];
+  createdAt?: string;
+}
+
+interface Order {
+  id: string;
+  userId?: string | null;
+  amount: number;
+  paymentConfirmed: boolean;
+  deliveryStatus: string;
+  cancelled?: boolean;
+}
+
 interface ManageUsersClientProps {
   users: User[];
   orders: Order[];
 }
+
+// Define available admin/manager pages (keys/routes)
+const AVAILABLE_PAGES = [
+  { key: "dashboard", label: "Dashboard" },
+  { key: "orders", label: "Orders" },
+  { key: "products", label: "Products" },
+  { key: "users", label: "Users" },
+  { key: "analytics", label: "Analytics" },
+  { key: "settings", label: "Settings" },
+];
 
 const ManageUsersClient: React.FC<ManageUsersClientProps> = ({ users, orders }) => {
   const router = useRouter();
@@ -43,6 +71,24 @@ const ManageUsersClient: React.FC<ManageUsersClientProps> = ({ users, orders }) 
       console.error(error);
     } finally {
       setIsLoading(null);
+    }
+  };
+
+  // Track loading state for accessiblePages update
+  const [accessLoading, setAccessLoading] = useState<string | null>(null);
+
+  // Handler to update accessiblePages for a user
+  const handleAccessChange = async (userId: string, newPages: string[]) => {
+    setAccessLoading(userId);
+    try {
+      await axios.put("/api/user/role", { userId, accessiblePages: newPages });
+      toast.success("Manager access updated!");
+      router.refresh();
+    } catch (error) {
+      toast.error("Failed to update access");
+      console.error(error);
+    } finally {
+      setAccessLoading(null);
     }
   };
 
@@ -109,7 +155,10 @@ const ManageUsersClient: React.FC<ManageUsersClientProps> = ({ users, orders }) 
         <div className="space-y-4">
           {users.map((user) => {
             const stats = getUserStats(user.id);
-            
+            const isManager = user.role === "MANAGER";
+            // For managers, show accessiblePages checklist
+            const userPages: string[] = Array.isArray((user as any).accessiblePages) ? (user as any).accessiblePages : [];
+
             return (
               <div
                 key={user.id}
@@ -169,7 +218,7 @@ const ManageUsersClient: React.FC<ManageUsersClientProps> = ({ users, orders }) 
                     </div>
                   </div>
 
-                  {/* User Metadata & Role Selector */}
+                  {/* User Metadata, Role Selector, and Access Checklist */}
                   <div className="flex flex-col gap-3 md:items-end">
                     <div className="flex items-center gap-2 text-xs text-slate-500">
                       <Calendar size={14} />
@@ -193,6 +242,31 @@ const ManageUsersClient: React.FC<ManageUsersClientProps> = ({ users, orders }) 
                         <option value="ADMIN">Admin</option>
                       </select>
                     </div>
+
+                    {/* Manager Page Access Checklist */}
+                    {isManager && (
+                      <div className="mt-2">
+                        <label className="text-xs text-slate-600 mb-1 block">Accessible Pages</label>
+                        <div className="flex flex-wrap gap-2">
+                          {AVAILABLE_PAGES.map((page) => (
+                            <label key={page.key} className="flex items-center gap-1 text-xs bg-slate-100 px-2 py-1 rounded">
+                              <input
+                                type="checkbox"
+                                checked={userPages.includes(page.key)}
+                                disabled={accessLoading === user.id}
+                                onChange={e => {
+                                  const newPages = e.target.checked
+                                    ? [...userPages, page.key]
+                                    : userPages.filter(p => p !== page.key);
+                                  handleAccessChange(user.id, newPages);
+                                }}
+                              />
+                              {page.label}
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

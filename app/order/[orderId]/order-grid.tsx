@@ -1,5 +1,10 @@
 import OrderItem from "./order-item";
-import { Order } from "@prisma/client";
+
+
+interface Order {
+  id: string;
+  products?: any[];
+}
 
 interface OrderGridProps {
   order: Order;

@@ -43,6 +43,7 @@ model User {
   orders            Order[]
   reviews           Review[]
   notifications     Notification[]
+  accessiblePages   String[] // List of page keys/routes this user (manager) can access
 }
 
 model Product {
@@ -99,6 +100,7 @@ model Order {
   reimbursedAt      DateTime?
   createDate        DateTime  @default(now())
   paymentIntentId   String    @unique
+  clientOrderToken  String?   @unique
   products          String[]
   address           String?
 

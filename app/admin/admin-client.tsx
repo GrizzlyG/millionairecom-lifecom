@@ -10,13 +10,18 @@ import ProductPerformanceChart from "./product-performance-chart";
 import UserGrowthChart from "./user-growth-chart";
 import OrderStatusChart from "./order-status-chart";
 import LocationGraph from "./location-graph";
-import { User, Role } from "@prisma/client";
 
-type SafeUser = Omit<User, "createdAt" | "updatedAt" | "emailVerified"> & {
+interface SafeUser {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  role: string;
   createdAt: string;
   updatedAt: string;
   emailVerified: string | null;
-};
+  accessiblePages?: string[];
+}
 
 export default function AdminClient({
   initialProducts,

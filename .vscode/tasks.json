@@ -37,6 +37,16 @@
 				"$tsc"
 			],
 			"group": "build"
+		},
+		{
+			"label": "Install lucide-react",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"install",
+				"lucide-react"
+			],
+			"isBackground": false
 		}
 	]
 }

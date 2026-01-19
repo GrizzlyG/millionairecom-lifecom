@@ -1,12 +1,37 @@
 "use client";
 
-import { Order, User } from "@prisma/client";
 import Heading from "@/app/components/heading";
 import { formatPrice } from "@/utils/format-price";
 import { CheckCircle, X, Printer, Check } from "lucide-react";
 
 import { useState } from "react";
 import Button from "@/app/components/button";
+
+
+interface User {
+  id: string;
+  name?: string | null;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  brand?: string;
+  category?: string;
+  quantity: number;
+  price: number;
+}
+
+interface Order {
+  id: string;
+  user?: User | null;
+  guestName?: string | null;
+  address?: string | null;
+  adminConfirmedAvailability?: boolean;
+  createDate?: string;
+  paymentConfirmed?: boolean;
+  products: Product[];
+}
 
 type OrderWithUser = Order & {
   user: User | null;
@@ -126,8 +151,10 @@ const OrderListClient: React.FC<OrderListClientProps> = ({ orders }) => {
                   {/* Admin Actions Section */}
                   <div className="mt-4 flex gap-2 items-center">
                     <span className="font-semibold text-sm">Actions:</span>
-                    {/* Dispatch Button (placeholder) */}
-                    <Button label="Dispatch" className="px-2 py-1 text-xs" onClick={() => alert('Dispatch action')} />
+                    {/* Dispatch Button (only if payment is confirmed) */}
+                    {order.paymentConfirmed && (
+                      <Button label="Dispatch" className="px-2 py-1 text-xs" onClick={() => alert('Dispatch action')} />
+                    )}
                     {/* Cancel Button (placeholder) */}
                     <Button label="Cancel" className="px-2 py-1 text-xs" onClick={() => alert('Cancel action')} />
                     {/* View Button (placeholder) */}
@@ -156,7 +183,7 @@ const OrderListClient: React.FC<OrderListClientProps> = ({ orders }) => {
                       </p>
                       <p className="text-sm">
                         <span className="font-medium">Date:</span>{" "}
-                        {new Date(order.createDate).toLocaleDateString()}
+                        {order.createDate ? new Date(order.createDate).toLocaleDateString() : "N/A"}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="font-medium text-sm">

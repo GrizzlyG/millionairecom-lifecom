@@ -3,13 +3,33 @@
 import Heading from "@/app/components/heading";
 import Status from "@/app/components/status";
 import { formatPrice } from "@/utils/format-price";
-import { Order } from "@prisma/client";
 import moment from "moment";
 import { Clock, Truck, Check } from "lucide-react";
 import { use, useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+
+
+interface Order {
+  id: string;
+  amount: number;
+  paymentConfirmed: boolean;
+  deliveryStatus: string;
+  cancelled?: boolean;
+  paymentClaimed?: boolean;
+  userConfirmedDelivery?: boolean;
+  products?: any[];
+  createDate?: string;
+  refundAmount?: number;
+  totalDmc?: number;
+  spf?: number;
+  reimbursed?: boolean;
+  address?: string | null;
+  guestName?: string | null;
+  guestEmail?: string | null;
+  adminConfirmedAvailability?: boolean;
+}
 
 interface OrderDetailsProps {
   order: Order;

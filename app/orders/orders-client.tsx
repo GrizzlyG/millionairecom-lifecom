@@ -1,6 +1,5 @@
 "use client";
 
-import { Order, User } from "@prisma/client";
 import { formatPrice } from "@/utils/format-price";
 import Heading from "@/app/components/heading";
 import Status from "@/app/components/status";
@@ -24,6 +23,33 @@ import moment from "moment";
 import { useCart } from "@/context/cart-context";
 import AlertDialog from "../components/alert-dialog";
 import Button from "@/app/components/button";
+
+
+interface User {
+  id: string;
+  name?: string | null;
+}
+
+interface Order {
+  id: string;
+  user: User;
+  amount: number;
+  paymentConfirmed: boolean;
+  deliveryStatus: string;
+  cancelled?: boolean;
+  paymentClaimed?: boolean;
+  userConfirmedDelivery?: boolean;
+  products?: any[];
+  createDate?: string;
+  refundAmount?: number;
+  totalDmc?: number;
+  spf?: number;
+  reimbursed?: boolean;
+  address?: string | null;
+  guestName?: string | null;
+  guestEmail?: string | null;
+  adminConfirmedAvailability?: boolean;
+}
 
 type ExtendedOrder = Order & {
   user: User;
@@ -261,7 +287,7 @@ const OrdersClient: React.FC<OrdersClient> = ({ orders }) => {
                   {/* Status & Actions */}
                   <div className="flex flex-col gap-3 md:items-end">
                     <div className="flex flex-wrap gap-2">
-                      <div className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${getPaymentStatusColor(order.paymentClaimed)}`}>
+                      <div className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${getPaymentStatusColor(order.paymentClaimed ?? false)}`}>
                         {order.paymentClaimed ? "✓ Paid" : "⏳ Pending Payment"}
                       </div>
                       {!isCancelled && (

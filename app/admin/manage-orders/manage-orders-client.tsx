@@ -1,6 +1,5 @@
 "use client";
 
-import { Order, User } from "@prisma/client";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { formatPrice } from "@/utils/format-price";
 import Heading from "@/app/components/heading";
@@ -23,6 +22,25 @@ import { useRouter } from "next/navigation";
 import moment from "moment";
 import AlertDialog from "@/app/components/alert-dialog";
 import Button from "@/app/components/button";
+
+
+interface User {
+  id: string;
+  name?: string | null;
+}
+
+interface Order {
+  id: string;
+  guestName?: string | null;
+  amount: number;
+  paymentClaimed: boolean;
+  paymentConfirmed: boolean;
+  createDate: string;
+  deliveryStatus: string;
+  cancelled: boolean;
+  userConfirmedDelivery?: boolean;
+  adminConfirmedAvailability?: boolean;
+}
 
 type ExtendedOrder = Order & {
   user: User | null;

@@ -17,7 +17,8 @@ export async function POST(request: Request) {
   try {
     const currentUser = await getCurrentUser();
     const body = await request.json();
-    const { items, guestEmail, guestName, address, guestFcmToken } = body;
+    const { items, guestEmail, guestName, address, guestFcmToken, clientOrderToken } = body;
+    console.log("[Order Debug] Received clientOrderToken:", clientOrderToken);
 
     if (!items || items.length === 0) {
       return NextResponse.json(
@@ -46,6 +47,20 @@ export async function POST(request: Request) {
     // Generate guest token for anonymous users
     const guestToken = !currentUser ? crypto.randomBytes(32).toString('hex') : null;
 
+    // Try to find an existing order by clientOrderToken (idempotency key)
+    let existingOrder = null;
+    if (clientOrderToken) {
+      existingOrder = await prismadb.order.findFirst({ where: { clientOrderToken } });
+      console.log("[Order Debug] Existing order found:", existingOrder ? existingOrder.id : null);
+    }
+    if (existingOrder) {
+      console.log("[Order Debug] Returning existing order for token:", clientOrderToken);
+      return NextResponse.json({
+        orderId: existingOrder.id,
+        guestToken: existingOrder.guestToken || undefined
+      });
+    }
+
     // Save order in DB
     const order = await prismadb.order.create({
       data: {
@@ -65,9 +80,9 @@ export async function POST(request: Request) {
         paymentClaimed: false,
         products: items.map((item: any) => JSON.stringify(item)),
         address: typeof address === 'string' ? address : JSON.stringify(address),
+        clientOrderToken,
       },
     });
-
 
     // Send push notification to all admins
     const admins = await prismadb.user.findMany({

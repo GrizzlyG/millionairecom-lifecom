@@ -1,14 +1,37 @@
 "use client";
 
-import { Order, User } from "@prisma/client";
 import Heading from "@/app/components/heading";
 import { formatPrice } from "@/utils/format-price";
 import { CheckCircle, X, Printer } from "lucide-react";
 import Button from "@/app/components/button";
 
-type OrderWithUser = Order & {
+
+interface User {
+  id: string;
+  name?: string | null;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  brand?: string;
+  category?: string;
+  quantity: number;
+  price: number;
+}
+
+interface Order {
+  id: string;
   user: User;
-};
+  guestName?: string | null;
+  address?: string | null;
+  adminConfirmedAvailability?: boolean;
+  createDate?: string;
+  paymentConfirmed?: boolean;
+  products: Product[];
+}
+
+type OrderWithUser = Order;
 
 interface OrderListClientProps {
   orders: OrderWithUser[];
@@ -98,7 +121,7 @@ const OrderListClient: React.FC<OrderListClientProps> = ({ orders }) => {
                       </p>
                       <p className="text-sm">
                         <span className="font-medium">Date:</span>{" "}
-                        {new Date(order.createDate).toLocaleDateString()}
+                        {order.createDate ? new Date(order.createDate).toLocaleDateString() : "N/A"}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="font-medium text-sm">

@@ -1,6 +1,5 @@
 "use client";
 
-import { Product } from "@prisma/client";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { formatPrice } from "@/utils/format-price";
 import Heading from "@/app/components/heading";
@@ -23,7 +22,7 @@ import { useRouter } from "next/navigation";
 import AlertDialog from "@/app/components/alert-dialog";
 
 interface ManageProductsClientProps {
-  products: Product[];
+  products: any[]; // Accept plain objects from server
 }
 
 const ManageProductsClient: React.FC<ManageProductsClientProps> = ({

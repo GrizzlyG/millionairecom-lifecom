@@ -8,6 +8,7 @@ export async function getProductPerformanceData() {
       },
     });
 
+    // Aggregate product stats by parsing each product entry as JSON
     const productStats: {
       [productId: string]: {
         name: string;
@@ -18,27 +19,32 @@ export async function getProductPerformanceData() {
     } = {};
 
     orders.forEach((order: any) => {
-      (order.products as any[]).forEach((product) => {
+      (order.products as string[]).forEach((productStr) => {
+        let product;
+        try {
+          product = JSON.parse(productStr);
+        } catch (e) {
+          return; // skip invalid entries
+        }
+        if (!product?.id) return;
         if (!productStats[product.id]) {
           productStats[product.id] = {
-            name: product.name,
+            name: product.name || "Unknown",
             revenue: 0,
             quantity: 0,
             orders: 0,
           };
         }
-
-        productStats[product.id].revenue += product.price * product.quantity;
-        productStats[product.id].quantity += product.quantity;
+        productStats[product.id].revenue += (product.price || 0) * (product.quantity || 1);
+        productStats[product.id].quantity += (product.quantity || 1);
         productStats[product.id].orders += 1;
       });
     });
 
-    const topProducts = Object.values(productStats)
-      .sort((a, b) => b.revenue - a.revenue)
-      .slice(0, 5);
+    const sortedProducts = Object.values(productStats)
+      .sort((a, b) => b.revenue - a.revenue);
 
-    return topProducts;
+    return sortedProducts;
   } catch (error: any) {
     throw new Error(error);
   }

@@ -11,22 +11,33 @@ export async function PUT(request: Request) {
   }
 
   try {
-    const { userId, role } = await request.json();
+    const { userId, role, accessiblePages } = await request.json();
 
-    if (!userId || !role) {
+    if (!userId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    if (!["USER", "ADMIN", "MANAGER"].includes(role)) {
-      return NextResponse.json({ error: "Invalid role" }, { status: 400 });
+    // Build update data
+    const updateData: any = {};
+    if (role) {
+      if (!["USER", "ADMIN", "MANAGER"].includes(role)) {
+        return NextResponse.json({ error: "Invalid role" }, { status: 400 });
+      }
+      updateData.role = role;
+    }
+    if (Array.isArray(accessiblePages)) {
+      updateData.accessiblePages = accessiblePages;
+    }
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
     }
 
     const user = await prismadb.user.update({
       where: { id: userId },
-      data: { role },
+      data: updateData,
     });
 
-    return NextResponse.json({ success: true, message: "User role updated successfully", user });
+    return NextResponse.json({ success: true, message: "User updated successfully", user });
   } catch (error) {
     console.error("Error updating user role:", error);
     return NextResponse.json({ error: "Failed to update user role" }, { status: 500 });

@@ -3,6 +3,7 @@
 import { useCart } from "@/context/cart-context";
 import { formatPrice } from "@/utils/format-price";
 import { useState, useEffect } from "react";
+import { v4 as uuidv4 } from "uuid";
 import { requestNotificationPermission } from "@/libs/firebase-messaging";
 import toast from "react-hot-toast";
 import Heading from "../components/heading";
@@ -31,7 +32,9 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
   const router = useRouter();
   const { cartSubtotal, cartTotalDmc, handleClearCart, cartProducts } = useCart();
   const [isLoading, setIsLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [bankDetails, setBankDetails] = useState<BankDetails | null>(null);
+  const [clientOrderToken, setClientOrderToken] = useState<string>(uuidv4());
   const [showGuestBanner, setShowGuestBanner] = useState(!currentUser);
   const [guestFcmToken, setGuestFcmToken] = useState<string | null>(null);
 
@@ -80,6 +83,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitted) return;
 
     // Basic validation
     if (!formData.name || !formData.phone || !formData.hostel) {
@@ -88,8 +92,10 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
     }
 
     setIsLoading(true);
+    setSubmitted(true);
 
     try {
+      console.log('[Order Debug] Sending clientOrderToken:', clientOrderToken);
       const response = await fetch("/api/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -102,6 +108,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
           phone: formData.phone,
           spf: spf,
           guestFcmToken: !currentUser ? guestFcmToken : undefined,
+          clientOrderToken,
         }),
       });
 
@@ -110,12 +117,15 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
       }
 
       const order = await response.json();
+      console.log('[Order Debug] Received order response:', order);
 
       toast.success("Order made successfully!");
       handleClearCart();
       handleSetPaymentSuccess(true, formData, order.orderId);
+      setClientOrderToken(uuidv4()); // Reset for next order
     } catch (error) {
       toast.error("Payment failed. Please try again.");
+      setSubmitted(false);
     } finally {
       setIsLoading(false);
     }

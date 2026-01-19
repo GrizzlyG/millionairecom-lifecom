@@ -1,7 +1,6 @@
 "use client";
 
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Heading from "@/app/components/heading";
 import Button from "@/app/components/button";
 import Input from "@/app/components/inputs/input";
@@ -10,7 +9,8 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
-import { CATEGORY_ICONS } from "@/app/actions/category-icons";
+import { CATEGORY_ICONS } from "./category-icons";
+import { CATEGORY_ICON_MAP } from "./category-icons";
 
 
 interface Category {
@@ -23,9 +23,6 @@ interface CategoryClientProps {
   categories: Category[];
 }
 
-
-
-import { useEffect } from "react";
 
 const CategoryClient: React.FC<CategoryClientProps> = ({ categories }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -115,26 +112,29 @@ const CategoryClient: React.FC<CategoryClientProps> = ({ categories }) => {
         />
         <div className="flex flex-col flex-1 w-full">
           <label className="mb-1 text-sm font-medium">Icon</label>
-          <div className="grid grid-cols-5 gap-2 w-full">
-            {CATEGORY_ICONS.map(({ name, icon: Icon }) => (
-              <button
-                type="button"
-                key={name}
-                className={`border rounded-md p-2 flex items-center justify-center ${selectedIcon === name ? "border-blue-500 bg-blue-50" : "border-gray-200"}`}
-                onClick={() => setSelectedIcon(name)}
-                disabled={isLoading}
-                aria-label={name}
-              >
-                <Icon className="w-4 h-4" />
-              </button>
-            ))}
+          <div className="grid grid-cols-5 md:grid-cols-8 gap-2 w-full min-w-[200px]">
+            {CATEGORY_ICONS.map(({ name }) => {
+              const Icon = CATEGORY_ICON_MAP[name];
+              return (
+                <button
+                  type="button"
+                  key={name}
+                  className={`border rounded-md p-2 flex items-center justify-center ${selectedIcon === name ? "border-blue-500 bg-blue-50" : "border-gray-200"}`}
+                  onClick={() => setSelectedIcon(name)}
+                  disabled={isLoading}
+                  aria-label={name}
+                >
+                  {Icon && <Icon size={20} />}
+                </button>
+              );
+            })}
           </div>
         </div>
         <Button label="Add" type="submit" disabled={isLoading} icon={Plus} small />
       </form>
       <ul className="space-y-2">
         {categoryList.map((category) => {
-          const Icon = CATEGORY_ICONS.find((i) => i.name === category.icon)?.icon;
+          const Icon = CATEGORY_ICON_MAP[category.icon ?? ""];
           return (
             <li key={category.id || category.label} className="flex items-center gap-2 border p-2 rounded-md">
               {Icon && <Icon className="w-5 h-5 mr-2 text-gray-700" />}

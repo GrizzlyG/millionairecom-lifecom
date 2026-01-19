@@ -3,19 +3,54 @@
 import Button from "@/app/components/button";
 import Heading from "@/app/components/heading";
 import TextArea from "@/app/components/inputs/text-area";
-import { SafeUser } from "@/types";
 import { Rating } from "@mui/material";
-import { Order, Product, Review } from "@prisma/client";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
+
+interface Review {
+  id: string;
+  userId: string;
+  productId: string;
+  rating: number;
+  comment: string;
+  createdDate: string;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  brand?: string;
+  category?: string;
+  price: number;
+  dmc?: number;
+  quantity?: number;
+  reviews: Review[];
+}
+
+interface Order {
+  id: string;
+  amount: number;
+  paymentConfirmed: boolean;
+  deliveryStatus: string;
+  cancelled?: boolean;
+  products?: any[];
+}
+
+interface SafeUser {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  role: string;
+  accessiblePages?: string[];
+  createdAt?: string;
+}
+
 interface AddRatingProps {
-  product: Product & {
-    reviews: Review[];
-  };
+  product: Product;
   user:
     | (SafeUser & {
         orders: Order[];
@@ -92,7 +127,7 @@ const AddRating: React.FC<AddRatingProps> = ({ product, user }) => {
   const deliveredOrder = user?.orders.some(
     (order) => {
       return (
-        order.products
+        (order.products ?? [])
           .map((itemStr: any) => {
             let item = itemStr;
             if (typeof itemStr === "string") {

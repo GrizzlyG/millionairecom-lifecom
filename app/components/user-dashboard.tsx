@@ -1,8 +1,16 @@
 "use client";
 
-import { Order } from "@prisma/client";
 import { ShoppingCart, CheckCircle, XCircle, Clock } from "lucide-react";
 import { formatPrice } from "@/utils/format-price";
+
+
+interface Order {
+  id: string;
+  amount: number;
+  paymentConfirmed: boolean;
+  deliveryStatus: string;
+  cancelled?: boolean;
+}
 
 interface UserDashboardProps {
   orders: Order[];

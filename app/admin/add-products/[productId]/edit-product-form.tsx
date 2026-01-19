@@ -15,7 +15,6 @@ import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { Product } from "@prisma/client";
 
 export type ImageType = {
   color: string;
@@ -29,7 +28,23 @@ export type UploadedImageType = {
   image: string;
 };
 
-const EditProductForm = ({ product }: { product: Product }) => {
+interface EditProduct {
+  id: string;
+  name: string;
+  description: string;
+  brand: string;
+  category: string;
+  inStock: boolean;
+  stock?: number;
+  remainingStock?: number;
+  isVisible?: boolean;
+  images: string[];
+  price: number;
+  dmc?: number;
+  discount?: number;
+}
+
+const EditProductForm = ({ product }: { product: EditProduct }) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [images, setImages] = useState<ImageType[] | null>();

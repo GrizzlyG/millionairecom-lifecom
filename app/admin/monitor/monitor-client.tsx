@@ -1,7 +1,6 @@
 
 "use client";
 
-import { Order, Settings } from "@prisma/client";
 import { useEffect, useState } from "react";
 import Heading from "@/app/components/heading";
 import { formatPrice } from "@/utils/format-price";
@@ -11,6 +10,25 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import Input from "@/app/components/inputs/input";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
+
+
+interface Order {
+  id: string;
+  amount: number;
+  paymentConfirmed: boolean;
+  reimbursed?: boolean;
+  totalDmc?: number;
+  spf?: number;
+  products?: any[];
+}
+
+
+interface Settings {
+  spf?: number;
+  nextDeliveryTime?: string | Date | null;
+  nextDeliveryEnabled?: boolean;
+  whatsappNumber?: string | null;
+}
 
 interface MonitorClientProps {
   orders: Order[];

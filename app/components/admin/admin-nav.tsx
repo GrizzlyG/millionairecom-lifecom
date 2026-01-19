@@ -23,12 +23,16 @@ const AdminNav = () => {
   const pathname = usePathname();
   const router = useRouter();
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [accessiblePages, setAccessiblePages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetch('/api/current-user-role')
       .then(res => res.json())
-      .then(data => setUserRole(data.role))
+      .then(data => {
+        setUserRole(data.role);
+        if (data.accessiblePages) setAccessiblePages(data.accessiblePages);
+      })
       .catch(() => setUserRole(null));
   }, []);
 
@@ -43,6 +47,25 @@ const AdminNav = () => {
 
   const isManager = userRole === "MANAGER";
 
+  // Define nav items with keys matching accessiblePages
+  const NAV_ITEMS = [
+    { key: "dashboard", label: "Summary", href: "/admin", icon: LayoutDashboard },
+    { key: "products", label: "Manage Products", href: "/admin/manage-products", icon: Package },
+    { key: "orders", label: "Manage Orders", href: "/admin/manage-orders", icon: List },
+    { key: "users", label: "Manage Users", href: "/admin/manage-users", icon: Users },
+    { key: "analytics", label: "Monitor", href: "/admin/monitor", icon: Monitor },
+    { key: "settings", label: "Bank Details", href: "/admin/manage-bank-details", icon: Building2 },
+    { key: "locations", label: "Locations", href: "/admin/manage-hostels", icon: Home },
+    { key: "categories", label: "Categories", href: "/admin/category", icon: LayoutGrid },
+    { key: "banner", label: "Banner", href: "/admin/manage-banner", icon: LayoutGrid },
+    { key: "add-products", label: "Add Products", href: "/admin/add-products", icon: PlusSquare },
+  ];
+
+  // For managers, only show allowed pages; for admins, show all
+  const visibleNavItems = isManager
+    ? NAV_ITEMS.filter(item => accessiblePages.includes(item.key) || item.key === "dashboard")
+    : NAV_ITEMS;
+
   return (
     <div className="w-full shadow-xl border-b-[0.5px] bg-slate-300">
       <Container>
@@ -52,80 +75,15 @@ const AdminNav = () => {
               <Spinner size={28} />
             </div>
           )}
-          <Link href={"/admin"} onClick={handleNavClick}>
-            <AdminNavItem
-              label="Summary"
-              icon={LayoutDashboard}
-              selected={pathname === "/admin"}
-            />
-          </Link>
-          {!isManager && (
-            <>
-              <Link href={"/admin/add-products"} onClick={handleNavClick}>
-                <AdminNavItem
-                  label="Add Products"
-                  icon={PlusSquare}
-                  selected={pathname === "/admin/add-products"}
-                />
-              </Link>
-              <Link href={"/admin/manage-products"} onClick={handleNavClick}>
-                <AdminNavItem
-                  label="Manage Products"
-                  icon={Package}
-                  selected={pathname === "/admin/manage-products"}
-                />
-              </Link>
-              <Link href={"/admin/manage-orders"} onClick={handleNavClick}>
-                <AdminNavItem
-                  label="Manage Orders"
-                  icon={List}
-                  selected={pathname === "/admin/manage-orders"}
-                />
-              </Link>
-              <Link href={"/admin/manage-users"} onClick={handleNavClick}>
-                <AdminNavItem
-                  label="Manage Users"
-                  icon={Users}
-                  selected={pathname === "/admin/manage-users"}
-                />
-              </Link>
-              <Link href={"/admin/monitor"} onClick={handleNavClick}>
-                <AdminNavItem
-                  label="Monitor"
-                  icon={Monitor}
-                  selected={pathname === "/admin/monitor"}
-                />
-              </Link>
-              <Link href={"/admin/manage-bank-details"} onClick={handleNavClick}>
-                <AdminNavItem
-                  label="Bank Details"
-                  icon={Building2}
-                  selected={pathname === "/admin/manage-bank-details"}
-                />
-              </Link>
-              <Link href={"/admin/manage-hostels"} onClick={handleNavClick}>
-                <AdminNavItem
-                  label="Locations"
-                  icon={Home}
-                  selected={pathname === "/admin/manage-hostels"}
-                />
-              </Link>
-              <Link href={"/admin/category"} onClick={handleNavClick}>
-                <AdminNavItem
-                  label="Categories"
-                  icon={LayoutGrid}
-                  selected={pathname === "/admin/category"}
-                />
-              </Link>
-              <Link href={"/admin/manage-banner"} onClick={handleNavClick}>
-                <AdminNavItem
-                  label="Banner"
-                  icon={LayoutGrid}
-                  selected={pathname === "/admin/manage-banner"}
-                />
-              </Link>
-            </>
-          )}
+          {visibleNavItems.map(item => (
+            <Link key={item.key} href={item.href} onClick={handleNavClick}>
+              <AdminNavItem
+                label={item.label}
+                icon={item.icon}
+                selected={pathname === item.href}
+              />
+            </Link>
+          ))}
           <div className="ml-auto mr-4">
             <AdminNotifications />
           </div>

@@ -1,11 +1,44 @@
 "use client";
 
-import { Order, Product, User } from "@prisma/client";
 import { useEffect, useState } from "react";
 import Heading from "../components/heading";
 import { formatPrice } from "@/utils/format-price";
 import { formatNumber } from "@/utils/formatNumber";
 import axios from "axios";
+
+
+interface Product {
+  id: string;
+  name: string;
+  brand?: string;
+  category?: string;
+  price: number;
+  dmc?: number;
+  quantity?: number;
+}
+
+interface User {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  role: string;
+  accessiblePages?: string[];
+  createdAt?: string;
+}
+
+interface Order {
+  id: string;
+  userId?: string | null;
+  amount: number;
+  paymentConfirmed: boolean;
+  deliveryStatus: string;
+  cancelled?: boolean;
+  refundAmount?: number;
+  totalDmc?: number;
+  spf?: number;
+  reimbursed?: boolean;
+  products: Product[];
+}
 
 interface SummaryProps {
   products: Product[];
