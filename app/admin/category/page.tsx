@@ -1,6 +1,3 @@
-
-
-
 import CategoryClient from "./category-client";
 import getCurrentUser from "@/actions/get-current-user";
 import NullData from "@/app/components/null-data";

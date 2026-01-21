@@ -40,6 +40,11 @@ Use this checklist to update all project-specific settings when duplicating your
 - [ ] Run migrations for new database
 - [ ] Seed database if required
 
+## 9. Git Remote Setup
+- [ ] Remove old git remote: `git remote remove origin`
+- [ ] Add new git remote: `git remote add origin <new-repo-url>`
+- [ ] Push to new remote: `git push -u origin main` (or `master` if that's your branch)
+
 ---
 
 **Tip:** Search the codebase for the old project name, Firebase project ID, and any URLs to ensure nothing is missed.

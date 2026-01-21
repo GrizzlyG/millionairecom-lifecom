@@ -50,9 +50,6 @@ const Footer: React.FC<FooterProps> = ({ whatsappNumber = null }) => {
                 Contact Us
               </Link>
             )}
-            <Link href="#" className={highlight}>
-              Shipping Policy
-            </Link>
             <Link href="/faq" className={highlight}>
               FAQs 
             </Link>

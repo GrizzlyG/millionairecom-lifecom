@@ -1,8 +1,10 @@
+
 import AdminNav from "../components/admin/admin-nav";
+import { appConfig } from "../../config/appConfig";
 
 export const metadata = {
-  title: "EasyByFar Admin",
-  description: "EasyByFar Admin Dashboard",
+  title: `${appConfig.appName} Admin`,
+  description: `${appConfig.appName} Admin Dashboard`,
 };
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {

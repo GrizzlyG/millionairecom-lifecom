@@ -2,7 +2,7 @@ export const appConfig = {
   aboutUsDescription: "The Easiest, Cheapest, Shop On Campus.",
   headerFooterBgColor: "#d92e18", // Default Tailwind bg-zinc-900
   headerFooterFontColor: "#f1f5f9", // Default Tailwind text-slate-200
-  appName: "easybynear",
+  appName: "easybyfar",
   appDescription: "Your personal e-commerce platform",
   logoUrl: "/logo.png",
   themeColor: "#fff",
